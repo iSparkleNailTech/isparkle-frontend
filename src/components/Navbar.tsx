@@ -52,7 +52,7 @@ const Navbar = ({ onBookNow, activeSection, onNavigate }: NavbarProps) => {
             <img
               src={logo}
               alt="iSparkle"
-              className="w-10 h-10 rounded-full border border-primary/30"
+              className="w-10 h-10 rounded-full"
             />
             <span className="font-heading text-xl font-semibold text-foreground hidden sm:block">
               iSparkle
