@@ -1,84 +1,6 @@
 import { motion } from "framer-motion";
-import { Sparkles, Heart, Sun, Scissors, Eye, Package } from "lucide-react";
-
-const serviceCategories = [
-  {
-    icon: Sparkles,
-    title: "Nails",
-    description: "Acrylic, Gel Builder (BIAB), Hard Gel, Nail Polishes, Nail Art & Manicure services",
-    services: [
-      { name: "Acrylic Nails", price: "Varies" },
-      { name: "Gel Builder (BIAB)", price: "Varies" },
-      { name: "Hard Gel", price: "Varies" },
-      { name: "Nail Art & Manicure", price: "Varies" },
-    ],
-  },
-  {
-    icon: Heart,
-    title: "Pedicure",
-    description: "Luxurious foot care treatments for ultimate relaxation",
-    services: [
-      { name: "Classic Pedicure", price: "Varies" },
-      { name: "iSparkle Signature Pedicure with gel", price: "Premium" },
-      { name: "Jelly Pedicure", price: "Premium" },
-    ],
-  },
-  {
-    icon: Sun,
-    title: "Facials",
-    description: "Rejuvenating facial treatments for glowing skin",
-    services: [
-      { name: "Deep Cleansing Facial", price: "GH₵250" },
-      { name: "Hydra Facial", price: "GH₵300" },
-      { name: "Dermaplaning Facial", price: "GH₵300" },
-      { name: "High Frequency Facial", price: "GH₵300" },
-      { name: "Brightening Facial", price: "GH₵300" },
-    ],
-  },
-  {
-    icon: Heart,
-    title: "Massages",
-    description: "Therapeutic massage treatments for body and mind",
-    services: [
-      { name: "Swedish Massage", price: "GH₵250" },
-      { name: "Deep Tissue Massage", price: "GH₵300" },
-      { name: "Hot Stone Massage", price: "GH₵400" },
-      { name: "Back & Neck Massage", price: "GH₵150" },
-    ],
-  },
-  {
-    icon: Scissors,
-    title: "Waxing",
-    description: "Professional waxing services for smooth, flawless skin",
-    services: [
-      { name: "Eye Brow", price: "GH₵70" },
-      { name: "Chin", price: "GH₵70" },
-      { name: "Upper Lip", price: "GH₵50" },
-      { name: "Bikini", price: "GH₵200" },
-      { name: "Back", price: "GH₵400" },
-      { name: "Leg", price: "GH₵250" },
-    ],
-  },
-  {
-    icon: Eye,
-    title: "Mink Eyelashes",
-    description: "Beautiful lash extensions to enhance your eyes",
-    services: [
-      { name: "Classic Lashes", price: "Varies" },
-      { name: "Hybrid Lashes", price: "Varies" },
-      { name: "Cat Eye Lashes", price: "Varies" },
-      { name: "Volume Mink Lashes", price: "Varies" },
-    ],
-  },
-  {
-    icon: Package,
-    title: "Other Services",
-    description: "Additional beauty and wellness treatments",
-    services: [
-      { name: "Cavitation Treatment", price: "GH₵400/session" },
-    ],
-  },
-];
+import { Package } from "lucide-react";
+import { serviceCategories } from "@/data/services";
 
 const Services = () => {
   return (
@@ -129,10 +51,13 @@ const Services = () => {
                   {category.description}
                 </p>
                 
-                <div className="space-y-2 pt-4 border-t border-border/50">
+                <div className="space-y-3 pt-4 border-t border-border/50">
                   {category.services.slice(0, 4).map((service) => (
                     <div key={service.name} className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">{service.name}</span>
+                      <div className="flex flex-col">
+                        <span className="text-muted-foreground">{service.name}</span>
+                        <span className="text-xs text-muted-foreground/70">{service.duration}</span>
+                      </div>
                       <span className="text-primary font-semibold">{service.price}</span>
                     </div>
                   ))}
