@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/isparkle-logo.jpg";
+import logo from "@/assets/isparkle-logo-new.png";
 
 interface HeroProps {
   onBookNow: () => void;
