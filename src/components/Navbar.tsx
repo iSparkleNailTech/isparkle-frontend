@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/isparkle-logo.jpg";
+import logo from "@/assets/isparkle-logo-clear.png";
 
 interface NavbarProps {
   onBookNow: () => void;

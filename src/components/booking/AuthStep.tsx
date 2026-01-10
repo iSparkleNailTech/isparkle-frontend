@@ -136,7 +136,7 @@ const AuthStep = ({ onSuccess }: AuthStepProps) => {
             </div>
 
             <Button
-              variant="secondary"
+              variant="gold"
               size="lg"
               className="w-full font-body"
               onClick={() => setMode("signup")}
