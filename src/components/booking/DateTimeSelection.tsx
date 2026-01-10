@@ -51,9 +51,9 @@ const DateTimeSelection = ({ service, onSelectDateTime }: DateTimeSelectionProps
       className="p-6"
     >
       {/* Service Info */}
-      <div className="mb-6 p-4 rounded-lg bg-secondary/50 border border-border/50">
-        <h3 className="font-semibold text-foreground text-lg">{service.name}</h3>
-        <p className="text-sm text-muted-foreground mt-1">
+      <div className="mb-6 p-4 rounded-lg bg-card border border-border/50">
+        <h3 className="font-body font-semibold text-foreground text-lg">{service.name}</h3>
+        <p className="text-sm text-muted-foreground mt-1 font-body">
           {service.duration} · {service.price}
         </p>
       </div>
