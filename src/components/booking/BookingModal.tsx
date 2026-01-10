@@ -140,7 +140,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
                 <ChevronLeft className="w-5 h-5 text-foreground" />
               </button>
             )}
-            <h2 className="font-heading text-lg font-semibold text-foreground">
+            <h2 className="font-body text-lg font-semibold text-foreground">
               {getStepTitle()}
             </h2>
           </div>

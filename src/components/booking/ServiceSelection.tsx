@@ -54,7 +54,7 @@ const ServiceSelection = ({
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
-                        <h4 className="font-medium text-foreground mb-1">
+                        <h4 className="font-body font-medium text-foreground mb-1">
                           {service.name}
                         </h4>
                         <p className="text-sm text-muted-foreground">
@@ -90,7 +90,7 @@ const ServiceSelection = ({
           >
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <h4 className="font-medium text-foreground mb-1">
+                <h4 className="font-body font-medium text-foreground mb-1">
                   {service.name}
                 </h4>
                 <p className="text-sm text-muted-foreground">
