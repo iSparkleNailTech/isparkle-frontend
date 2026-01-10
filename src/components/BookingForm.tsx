@@ -13,12 +13,20 @@ interface BookingFormProps {
 }
 
 const services = [
-  "Hair Styling",
-  "Facial Treatments",
-  "Makeup Artistry",
-  "Nail Care",
-  "Body Treatments",
-  "Bridal Packages",
+  "Nails - Acrylic/Gel/BIAB",
+  "Classic Pedicure",
+  "iSparkle Signature Pedicure",
+  "Jelly Pedicure",
+  "Deep Cleansing Facial",
+  "Hydra Facial",
+  "Dermaplaning Facial",
+  "Swedish Massage",
+  "Deep Tissue Massage",
+  "Hot Stone Massage",
+  "Back & Neck Massage",
+  "Waxing Services",
+  "Mink Eyelashes",
+  "Cavitation Treatment",
 ];
 
 const timeSlots = [

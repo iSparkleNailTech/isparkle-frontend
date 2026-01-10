@@ -2,13 +2,15 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/isparkle-logo.jpeg";
+import logo from "@/assets/isparkle-logo.jpg";
 
 interface NavbarProps {
   onBookNow: () => void;
+  activeSection: string;
+  onNavigate: (section: string) => void;
 }
 
-const Navbar = ({ onBookNow }: NavbarProps) => {
+const Navbar = ({ onBookNow, activeSection, onNavigate }: NavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -21,9 +23,18 @@ const Navbar = ({ onBookNow }: NavbarProps) => {
   }, []);
 
   const navLinks = [
-    { href: "#services", label: "Services" },
-    { href: "#contact", label: "Contact" },
+    { id: "about", label: "Get to know us" },
+    { id: "services", label: "Services" },
+    { id: "gallery", label: "Gallery & Promotions" },
+    { id: "booking", label: "Booking Calendar" },
+    { id: "reviews", label: "Reviews" },
+    { id: "contact", label: "Contact Us" },
   ];
+
+  const handleNavClick = (id: string) => {
+    onNavigate(id);
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <>
@@ -37,7 +48,7 @@ const Navbar = ({ onBookNow }: NavbarProps) => {
       >
         <nav className="container px-4 py-4 flex items-center justify-between">
           {/* Logo */}
-          <a href="#" className="flex items-center gap-3">
+          <button onClick={() => handleNavClick("home")} className="flex items-center gap-3">
             <img
               src={logo}
               alt="iSparkle"
@@ -46,18 +57,22 @@ const Navbar = ({ onBookNow }: NavbarProps) => {
             <span className="font-heading text-xl font-semibold text-foreground hidden sm:block">
               iSparkle
             </span>
-          </a>
+          </button>
 
           {/* Desktop nav */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-6">
             {navLinks.map(link => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="text-muted-foreground hover:text-primary transition-colors font-medium"
+              <button
+                key={link.id}
+                onClick={() => handleNavClick(link.id)}
+                className={`text-sm font-medium transition-colors ${
+                  activeSection === link.id 
+                    ? "text-primary" 
+                    : "text-muted-foreground hover:text-primary"
+                }`}
               >
                 {link.label}
-              </a>
+              </button>
             ))}
             <Button variant="gold" onClick={onBookNow}>
               <Sparkles className="w-4 h-4" />
@@ -68,7 +83,7 @@ const Navbar = ({ onBookNow }: NavbarProps) => {
           {/* Mobile menu button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 text-foreground"
+            className="lg:hidden p-2 text-foreground"
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -82,18 +97,21 @@ const Navbar = ({ onBookNow }: NavbarProps) => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-x-0 top-[72px] z-30 md:hidden glass border-b border-border/50"
+            className="fixed inset-x-0 top-[72px] z-30 lg:hidden glass border-b border-border/50"
           >
             <div className="container px-4 py-6 flex flex-col gap-4">
               {navLinks.map(link => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-foreground hover:text-primary transition-colors font-medium py-2"
+                <button
+                  key={link.id}
+                  onClick={() => handleNavClick(link.id)}
+                  className={`text-left font-medium py-2 transition-colors ${
+                    activeSection === link.id 
+                      ? "text-primary" 
+                      : "text-foreground hover:text-primary"
+                  }`}
                 >
                   {link.label}
-                </a>
+                </button>
               ))}
               <Button
                 variant="gold"
