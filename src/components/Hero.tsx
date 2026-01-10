@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/isparkle-logo.jpeg";
+import logo from "@/assets/isparkle-logo.jpg";
 
 interface HeroProps {
   onBookNow: () => void;
@@ -9,9 +9,9 @@ interface HeroProps {
 
 const Hero = ({ onBookNow }: HeroProps) => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background effects */}
-      <div className="absolute inset-0 bg-gradient-to-b from-charcoal via-charcoal-light to-charcoal" />
+      <div className="absolute inset-0 bg-background" />
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-gold-light/10 rounded-full blur-3xl" />
@@ -34,7 +34,7 @@ const Hero = ({ onBookNow }: HeroProps) => {
             <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden border-4 border-primary/50 shadow-gold-lg animate-glow">
               <img
                 src={logo}
-                alt="iSparkle Beauty Salon"
+                alt="iSparkle Day Spa"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -57,8 +57,8 @@ const Hero = ({ onBookNow }: HeroProps) => {
             transition={{ delay: 0.5, duration: 0.8 }}
             className="font-heading text-4xl md:text-6xl lg:text-7xl font-semibold text-foreground mb-6"
           >
-            Discover Your
-            <span className="block text-gradient-gold">Inner Radiance</span>
+            Welcome to
+            <span className="block text-gradient-gold">iSparkle Day Spa</span>
           </motion.h1>
 
           {/* Description */}
@@ -66,10 +66,9 @@ const Hero = ({ onBookNow }: HeroProps) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7, duration: 0.8 }}
-            className="text-muted-foreground text-lg md:text-xl max-w-2xl mb-10 leading-relaxed"
+            className="text-cream text-lg md:text-xl max-w-2xl mb-10 leading-relaxed"
           >
-            Experience luxury beauty treatments crafted to enhance your natural glow.
-            Let our expert stylists transform you into the best version of yourself.
+            With over 10 years of excellence in the beauty industry, we are your trusted destination in Tema for premium nail care, facials, massages, and wellness services.
           </motion.p>
 
           {/* CTA Buttons */}
