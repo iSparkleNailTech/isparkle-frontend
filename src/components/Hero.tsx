@@ -31,8 +31,8 @@ const Hero = ({ onBookNow }: HeroProps) => {
             transition={{ duration: 1, ease: "easeOut" }}
             className="relative mb-8"
           >
-            <div className="w-56 h-56 md:w-72 md:h-72 rounded-full overflow-hidden">
-              <img src={logo} alt="iSparkle Day Spa" className="w-full h-full object-cover" />
+            <div className="w-56 h-56 md:w-72 md:h-72 rounded-full overflow-hidden bg-background">
+              <img src={logo} alt="iSparkle Day Spa" className="w-full h-full object-cover block" />
             </div>
           </motion.div>
 
