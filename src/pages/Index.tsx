@@ -9,7 +9,7 @@ import BookingCalendar from "@/components/BookingCalendar";
 import ReviewsSection from "@/components/ReviewsSection";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
-import BookingForm from "@/components/BookingForm";
+import BookingModal from "@/components/booking/BookingModal";
 
 const Index = () => {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
@@ -23,7 +23,6 @@ const Index = () => {
     if (section === "home") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else if (section === "booking") {
-      // Open booking form for booking section
       document.getElementById(section)?.scrollIntoView({ behavior: "smooth" });
     } else {
       document.getElementById(section)?.scrollIntoView({ behavior: "smooth" });
@@ -50,7 +49,7 @@ const Index = () => {
 
       <AnimatePresence>
         {isBookingOpen && (
-          <BookingForm isOpen={isBookingOpen} onClose={handleCloseBooking} />
+          <BookingModal isOpen={isBookingOpen} onClose={handleCloseBooking} />
         )}
       </AnimatePresence>
     </div>
