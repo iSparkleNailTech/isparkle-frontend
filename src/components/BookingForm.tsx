@@ -122,7 +122,7 @@ const BookingForm = ({ isOpen, onClose }: BookingFormProps) => {
               value={formData.name}
               onChange={e => handleInputChange("name", e.target.value)}
               required
-              className="bg-secondary text-secondary-foreground placeholder:text-secondary-foreground/50 border-border focus:border-primary"
+              className="bg-secondary border-border focus:border-primary"
             />
           </div>
 
@@ -139,7 +139,7 @@ const BookingForm = ({ isOpen, onClose }: BookingFormProps) => {
                 value={formData.email}
                 onChange={e => handleInputChange("email", e.target.value)}
                 required
-                className="bg-secondary text-secondary-foreground placeholder:text-secondary-foreground/50 border-border focus:border-primary"
+                className="bg-secondary border-border focus:border-primary"
               />
             </div>
 
@@ -155,7 +155,7 @@ const BookingForm = ({ isOpen, onClose }: BookingFormProps) => {
                 value={formData.phone}
                 onChange={e => handleInputChange("phone", e.target.value)}
                 required
-                className="bg-secondary text-secondary-foreground placeholder:text-secondary-foreground/50 border-border focus:border-primary"
+                className="bg-secondary border-border focus:border-primary"
               />
             </div>
           </div>
@@ -170,8 +170,8 @@ const BookingForm = ({ isOpen, onClose }: BookingFormProps) => {
               onValueChange={value => handleInputChange("service", value)}
               required
             >
-              <SelectTrigger className="bg-secondary text-secondary-foreground border-border focus:border-primary">
-                <SelectValue placeholder="Select a service" className="placeholder:text-secondary-foreground/50" />
+              <SelectTrigger className="bg-secondary border-border focus:border-primary">
+                <SelectValue placeholder="Select a service" />
               </SelectTrigger>
               <SelectContent>
                 {services.map(service => (
@@ -196,7 +196,7 @@ const BookingForm = ({ isOpen, onClose }: BookingFormProps) => {
                 value={formData.date}
                 onChange={e => handleInputChange("date", e.target.value)}
                 required
-                className="bg-secondary text-secondary-foreground border-border focus:border-primary"
+                className="bg-secondary border-border focus:border-primary"
               />
             </div>
 
@@ -210,7 +210,7 @@ const BookingForm = ({ isOpen, onClose }: BookingFormProps) => {
                 onValueChange={value => handleInputChange("time", value)}
                 required
               >
-                <SelectTrigger className="bg-secondary text-secondary-foreground border-border focus:border-primary">
+                <SelectTrigger className="bg-secondary border-border focus:border-primary">
                   <SelectValue placeholder="Select time" />
                 </SelectTrigger>
                 <SelectContent>
