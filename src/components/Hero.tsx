@@ -31,8 +31,8 @@ const Hero = ({ onBookNow }: HeroProps) => {
             transition={{ duration: 1, ease: "easeOut" }}
             className="relative mb-8"
           >
-            <div className="w-76 h-76 md:w-72 md:h-72 rounded-full overflow-hidden bg-background">
-              <img src={logo} alt="iSparkle Day Spa" className="w-full h-full object-cover block" />
+            <div className="w-58 h-58 md:w-64 md:h-64 rounded-full overflow-hidden border-4 border-primary/50 shadow-gold-lg animate-glow">
+              <img src={logo} alt="iSparkle Day Spa" className="w-full h-full object-cover" />
             </div>
           </motion.div>
 
@@ -54,7 +54,7 @@ const Hero = ({ onBookNow }: HeroProps) => {
             className="font-heading text-4xl md:text-6xl lg:text-7xl font-semibold text-foreground mb-6"
           >
             Welcome to
-            <span className="block text-gradient-gold">iSparkle</span>
+            <span className="block text-gradient-gold">iSparkle Day Spa</span>
           </motion.h1>
 
           {/* Description */}
