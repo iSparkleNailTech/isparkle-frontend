@@ -32,11 +32,7 @@ const Hero = ({ onBookNow }: HeroProps) => {
             className="relative mb-8"
           >
             <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden border-4 border-primary/50 shadow-gold-lg animate-glow">
-              <img
-                src={logo}
-                alt="iSparkle Day Spa"
-                className="w-full h-full object-cover"
-              />
+              <img src={logo} alt="iSparkle Day Spa" className="w-full h-full object-cover" />
             </div>
           </motion.div>
 
@@ -58,7 +54,7 @@ const Hero = ({ onBookNow }: HeroProps) => {
             className="font-heading text-4xl md:text-6xl lg:text-7xl font-semibold text-foreground mb-6"
           >
             Welcome to
-            <span className="block text-gradient-gold">iSparkle Day Spa</span>
+            <span className="block text-gradient-gold">iSparkle</span>
           </motion.h1>
 
           {/* Description */}
@@ -68,7 +64,8 @@ const Hero = ({ onBookNow }: HeroProps) => {
             transition={{ delay: 0.7, duration: 0.8 }}
             className="text-cream text-lg md:text-xl max-w-2xl mb-10 leading-relaxed"
           >
-            With over 10 years of excellence in the beauty industry, we are your trusted destination in Tema for premium nail care, facials, massages, and wellness services.
+            With over 10 years of excellence in the beauty industry, we are your trusted destination in Tema for premium
+            nail care, facials, massages, and wellness services.
           </motion.p>
 
           {/* CTA Buttons */}
