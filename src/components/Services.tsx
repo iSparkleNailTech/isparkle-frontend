@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Sparkles, Heart, Sun, Scissors, Eye, Package, Eye-Closed } from "lucide-react";
+import { Sparkles, Heart, Sun, Scissors, Eye, Package, EyeClosed } from "lucide-react";
 
 const serviceCategories = [
   {
@@ -60,7 +60,7 @@ const serviceCategories = [
     ],
   },
   {
-    icon: Eye-Closed,
+    icon: EyeClosed,
     title: "Mink Eyelashes",
     description: "Beautiful lash extensions to enhance your eyes",
     services: [
@@ -74,9 +74,7 @@ const serviceCategories = [
     icon: Package,
     title: "Other Services",
     description: "Additional beauty and wellness treatments",
-    services: [
-      { name: "Cavitation Treatment", price: "GH₵400/session" },
-    ],
+    services: [{ name: "Cavitation Treatment", price: "GH₵400/session" }],
   },
 ];
 
@@ -85,7 +83,7 @@ const Services = () => {
     <section id="services" className="py-24 bg-black-light relative">
       {/* Background accent */}
       <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-      
+
       <div className="container px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -94,14 +92,11 @@ const Services = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <p className="text-primary font-body text-sm tracking-[0.3em] uppercase mb-3">
-            Our Expertise
-          </p>
-          <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground mb-4">
-            Premium Services
-          </h2>
+          <p className="text-primary font-body text-sm tracking-[0.3em] uppercase mb-3">Our Expertise</p>
+          <h2 className="font-heading text-4xl md:text-5xl font-semibold text-foreground mb-4">Premium Services</h2>
           <p className="text-cream max-w-2xl mx-auto">
-            Indulge in our curated selection of beauty treatments designed to pamper and transform. Home services available!
+            Indulge in our curated selection of beauty treatments designed to pamper and transform. Home services
+            available!
           </p>
         </motion.div>
 
@@ -120,15 +115,11 @@ const Services = () => {
                 <div className="w-14 h-14 rounded-lg bg-gradient-gold flex items-center justify-center mb-6 group-hover:shadow-gold transition-shadow">
                   <category.icon className="w-7 h-7 text-primary-foreground" />
                 </div>
-                
-                <h3 className="font-heading text-2xl font-semibold text-foreground mb-3">
-                  {category.title}
-                </h3>
-                
-                <p className="text-cream mb-6 leading-relaxed text-sm">
-                  {category.description}
-                </p>
-                
+
+                <h3 className="font-heading text-2xl font-semibold text-foreground mb-3">{category.title}</h3>
+
+                <p className="text-cream mb-6 leading-relaxed text-sm">{category.description}</p>
+
                 <div className="space-y-2 pt-4 border-t border-border/50">
                   {category.services.slice(0, 4).map((service) => (
                     <div key={service.name} className="flex items-center justify-between text-sm">
@@ -154,9 +145,7 @@ const Services = () => {
           className="mt-12 text-center p-6 rounded-xl bg-card border border-primary/30"
         >
           <Package className="w-8 h-8 text-primary mx-auto mb-3" />
-          <h3 className="font-heading text-xl font-semibold text-foreground mb-2">
-            Products Available
-          </h3>
+          <h3 className="font-heading text-xl font-semibold text-foreground mb-2">Products Available</h3>
           <p className="text-cream">
             We sell a wide variety of skincare, body care products as well as fashion accessories
           </p>
