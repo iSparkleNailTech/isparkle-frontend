@@ -1,5 +1,19 @@
 import { motion } from "framer-motion";
-import { Sparkles, Tag } from "lucide-react";
+import { Tag } from "lucide-react";
+
+import nails1 from "@/assets/gallery/nails-1.jpg";
+import nails2 from "@/assets/gallery/nails-2.jpg";
+import nails3 from "@/assets/gallery/nails-3.jpg";
+import nails4 from "@/assets/gallery/nails-4.jpg";
+import nails5 from "@/assets/gallery/nails-5.jpg";
+
+const galleryImages = [
+  { src: nails1, alt: "Gold glitter almond nails" },
+  { src: nails2, alt: "Classic French tip square nails" },
+  { src: nails3, alt: "White French tip nails" },
+  { src: nails4, alt: "Pink and red glitter almond nails" },
+  { src: nails5, alt: "Nude with white and gold tips" },
+];
 
 const GallerySection = () => {
   return (
@@ -25,21 +39,22 @@ const GallerySection = () => {
           </p>
         </motion.div>
 
-        {/* Placeholder gallery grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-12">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
+        {/* Gallery grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-12">
+          {galleryImages.map((image, index) => (
             <motion.div
-              key={item}
+              key={index}
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: item * 0.05 }}
-              className="aspect-square rounded-xl bg-card border border-border/50 overflow-hidden flex items-center justify-center group hover:border-primary/50 transition-all duration-300"
+              transition={{ duration: 0.5, delay: index * 0.05 }}
+              className="aspect-square rounded-xl overflow-hidden group hover:shadow-xl transition-all duration-300"
             >
-              <div className="text-center p-4">
-                <Sparkles className="w-8 h-8 text-primary/50 mx-auto mb-2 group-hover:text-primary transition-colors" />
-                <p className="text-muted-foreground text-sm">Coming Soon</p>
-              </div>
+              <img
+                src={image.src}
+                alt={image.alt}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
             </motion.div>
           ))}
         </div>
