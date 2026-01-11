@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Sparkles, Heart, Sun, Scissors, Eye, Package, EyeClosed } from "lucide-react";
+import { Sparkles, Heart, Sun, Scissors, Eye, Package, EyeClosed, Sprout } from "lucide-react";
 
 const serviceCategories = [
   {
@@ -36,7 +36,7 @@ const serviceCategories = [
     ],
   },
   {
-    icon: Heart,
+    icon: Sprout,
     title: "Massages",
     description: "Therapeutic massage treatments for body and mind",
     services: [
