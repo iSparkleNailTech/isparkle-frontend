@@ -1,4 +1,4 @@
-import { Sparkles, Heart, Sun, Scissors, Eye, Package } from "lucide-react";
+import { Hand, Footprints, Smile, Heart, Scissors, Eye, Sparkles } from "lucide-react";
 
 export interface ServiceItem {
   name: string;
@@ -15,7 +15,7 @@ export interface ServiceCategory {
 
 export const serviceCategories: ServiceCategory[] = [
   {
-    icon: Sparkles,
+    icon: Hand,
     title: "Nails",
     description: "Acrylic, Gel Builder (BIAB), Hard Gel, Nail Polishes, Nail Art & Manicure services",
     services: [
@@ -26,7 +26,7 @@ export const serviceCategories: ServiceCategory[] = [
     ],
   },
   {
-    icon: Heart,
+    icon: Footprints,
     title: "Pedicure",
     description: "Luxurious foot care treatments for ultimate relaxation",
     services: [
@@ -36,7 +36,7 @@ export const serviceCategories: ServiceCategory[] = [
     ],
   },
   {
-    icon: Sun,
+    icon: Smile,
     title: "Facials",
     description: "Rejuvenating facial treatments for glowing skin",
     services: [
@@ -83,7 +83,7 @@ export const serviceCategories: ServiceCategory[] = [
     ],
   },
   {
-    icon: Package,
+    icon: Sparkles,
     title: "Other Services",
     description: "Additional beauty and wellness treatments",
     services: [
