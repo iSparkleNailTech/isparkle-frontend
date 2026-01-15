@@ -6,6 +6,7 @@ export interface ServiceCategoryResponse {
   defaultDurationMinutes: number;
   capacity: number;
   isActive: boolean;
+  packages: PackageResponse[];
 }
 
 export interface PackageResponse {

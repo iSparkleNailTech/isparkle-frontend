@@ -38,7 +38,7 @@ const ServiceSelection = ({
                   {category.name}
                 </h4>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Click to view packages
+                  {category.packages.length} services available
                 </p>
               </div>
               <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -105,10 +105,21 @@ const ServiceSelection = ({
         className="p-4 space-y-2 font-body"
       >
         {packages.map((pkg) => {
-          const duration = pkg.durationMinutes
-            ? `${pkg.durationMinutes} mins`
-            : "Standard duration";
-          const price = `GH₵${(pkg.price / 100).toFixed(2)}`;
+          const formatDuration = (minutes: number | null | undefined): string => {
+            const mins = minutes ?? categories?.find((c) => c._id === selectedCategoryId)?.defaultDurationMinutes ?? 0;
+            if (mins >= 60) {
+              const hours = Math.floor(mins / 60);
+              const remainingMins = mins % 60;
+              if (remainingMins === 0) {
+                return `${hours} hr`;
+              }
+              return `${hours} hr ${remainingMins} mins`;
+            }
+            return `${mins} mins`;
+          };
+
+          const duration = formatDuration(pkg.durationMinutes);
+          const price = `GH₵${pkg.price.toFixed(0)}`;
 
           return (
             <button

@@ -37,7 +37,7 @@ const getServiceDescription = (name: string): string => {
   if (nameLower.includes("lash") || nameLower.includes("eyelash")) {
     return "Beautiful lash extensions to enhance your eyes";
   }
-  return "Premium beauty and wellness treatments";
+  return "Additional beauty and wellness treatments";
 };
 
 const Services = () => {
@@ -118,12 +118,25 @@ const Services = () => {
                   <p className="text-cream mb-6 leading-relaxed text-sm">{description}</p>
 
                   <div className="space-y-2 pt-4 border-t border-border/50">
-                    <p className="text-muted-foreground text-sm">
-                      Duration: {category.defaultDurationMinutes} minutes
-                    </p>
-                    <p className="text-muted-foreground text-xs pt-2">
-                      Click to view available packages
-                    </p>
+                    {category.packages && category.packages.length > 0 ? (
+                      <>
+                        {category.packages.slice(0, 6).map((pkg) => (
+                          <div key={pkg._id} className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground">{pkg.name}</span>
+                            <span className="text-primary font-semibold">GH₵{pkg.price.toFixed(0)}</span>
+                          </div>
+                        ))}
+                        {category.packages.length > 6 && (
+                          <p className="text-muted-foreground text-xs pt-2">
+                            + {category.packages.length - 4} more {category.packages.length - 4 === 1 ? 'service' : 'services'}
+                          </p>
+                        )}
+                      </>
+                    ) : (
+                      <p className="text-muted-foreground text-sm">
+                        Duration: {category.defaultDurationMinutes} minutes
+                      </p>
+                    )}
                   </div>
                 </div>
               </motion.div>
