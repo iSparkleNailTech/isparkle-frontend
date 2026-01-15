@@ -8,10 +8,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface AuthStepProps {
-  onSuccess: () => void;
+  onSuccess: (name: string, email: string, phone: string) => void;
 }
 
-type AuthMode = "options" | "login" | "signup";
+type AuthMode = "options" | "login" | "signup" | "phone";
 
 const GoogleIcon = () => (
   <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -39,6 +39,7 @@ const AuthStep = ({ onSuccess }: AuthStepProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleSignIn = async () => {
@@ -60,7 +61,7 @@ const AuthStep = ({ onSuccess }: AuthStepProps) => {
     e.preventDefault();
     setIsLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -71,12 +72,29 @@ const AuthStep = ({ onSuccess }: AuthStepProps) => {
       return;
     }
 
+    // Get user's name from profile or use email
+    const userName = data.user?.user_metadata?.full_name || email.split("@")[0];
+    const userEmail = data.user?.email || email;
+    
+    // For login, we still need phone number - show a form to collect it
+    if (!phone) {
+      setMode("phone");
+      setIsLoading(false);
+      return;
+    }
+
     toast.success("Logged in successfully!");
-    onSuccess();
+    onSuccess(userName, userEmail, phone);
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!name || !email || !password || !phone) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
     setIsLoading(true);
 
     const { error } = await supabase.auth.signUp({
@@ -95,7 +113,23 @@ const AuthStep = ({ onSuccess }: AuthStepProps) => {
     }
 
     toast.success("Account created successfully!");
-    onSuccess();
+    onSuccess(name, email, phone);
+  };
+
+  const handlePhoneSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!phone) {
+      toast.error("Please enter your phone number");
+      return;
+    }
+    // Get user info from session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        const userName = session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "";
+        const userEmail = session.user.email || "";
+        onSuccess(userName, userEmail, phone);
+      }
+    });
   };
 
   if (mode === "options") {
@@ -141,7 +175,7 @@ const AuthStep = ({ onSuccess }: AuthStepProps) => {
               className="w-full font-body"
               onClick={() => setMode("signup")}
             >
-              Create profile
+              Continue with email
             </Button>
           </div>
         </div>
@@ -220,6 +254,55 @@ const AuthStep = ({ onSuccess }: AuthStepProps) => {
     );
   }
 
+  if (mode === "phone") {
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: 20 }}
+        className="p-6 font-body"
+      >
+        <div className="max-w-md mx-auto">
+          <div className="p-8 rounded-2xl bg-card border border-border/50">
+            <h3 className="font-body text-2xl font-semibold text-foreground mb-6 text-center">
+              Phone Number
+            </h3>
+            <p className="text-sm text-muted-foreground mb-6 text-center">
+              We need your phone number to confirm your booking
+            </p>
+            <form onSubmit={handlePhoneSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="phone" className="font-body">Phone Number</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="+1234567890"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                  className="bg-card border-border font-body"
+                />
+              </div>
+              <Button
+                type="submit"
+                variant="gold"
+                size="lg"
+                className="w-full font-body"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Continue"
+                )}
+              </Button>
+            </form>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
@@ -270,6 +353,19 @@ const AuthStep = ({ onSuccess }: AuthStepProps) => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
+                className="bg-card border-border font-body"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="signup-phone" className="font-body">Phone Number</Label>
+              <Input
+                id="signup-phone"
+                type="tel"
+                placeholder="+1234567890"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
                 className="bg-card border-border font-body"
               />
             </div>

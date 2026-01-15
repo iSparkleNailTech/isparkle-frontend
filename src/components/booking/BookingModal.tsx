@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft } from "lucide-react";
-import { serviceCategories, ServiceCategory, ServiceItem } from "@/data/services";
+import { useQuery } from "@tanstack/react-query";
 import ServiceSelection from "./ServiceSelection";
 import DateTimeSelection from "./DateTimeSelection";
 import AuthStep from "./AuthStep";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
+import { api } from "@/integrations/backend/api";
+import type { ServiceCategoryResponse, PackageResponse } from "@/types/booking";
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -17,21 +19,37 @@ interface BookingModalProps {
 export type BookingStep = "service" | "subservice" | "datetime" | "auth";
 
 export interface BookingState {
-  category: ServiceCategory | null;
-  service: ServiceItem | null;
+  serviceCategoryId: string | null;
+  serviceCategoryName: string | null;
+  packageId: string | null;
+  packageName: string | null;
   date: Date | null;
   timeSlot: string | null;
+  customerName: string | null;
+  customerEmail: string | null;
+  customerPhone: string | null;
 }
 
 const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
   const [step, setStep] = useState<BookingStep>("service");
   const [booking, setBooking] = useState<BookingState>({
-    category: null,
-    service: null,
+    serviceCategoryId: null,
+    serviceCategoryName: null,
+    packageId: null,
+    packageName: null,
     date: null,
     timeSlot: null,
+    customerName: null,
+    customerEmail: null,
+    customerPhone: null,
   });
   const [user, setUser] = useState<User | null>(null);
+
+  const { data: servicesData } = useQuery({
+    queryKey: ["services"],
+    queryFn: () => api.getServices(),
+    enabled: isOpen,
+  });
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
@@ -45,56 +63,131 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleSelectCategory = (category: ServiceCategory) => {
-    setBooking((prev) => ({ ...prev, category }));
+  const handleSelectCategory = (category: ServiceCategoryResponse) => {
+    setBooking((prev) => ({
+      ...prev,
+      serviceCategoryId: category._id,
+      serviceCategoryName: category.name,
+    }));
     setStep("subservice");
   };
 
-  const handleSelectService = (service: ServiceItem) => {
-    setBooking((prev) => ({ ...prev, service }));
+  const handleSelectPackage = (pkg: PackageResponse, serviceCategoryId: string) => {
+    setBooking((prev) => ({
+      ...prev,
+      packageId: pkg._id,
+      packageName: pkg.name,
+    }));
     setStep("datetime");
   };
 
   const handleSelectDateTime = (date: Date, timeSlot: string) => {
     setBooking((prev) => ({ ...prev, date, timeSlot }));
-    if (user) {
-      handleConfirmBooking();
-    } else {
-      setStep("auth");
-    }
+    setStep("auth");
   };
 
-  const handleAuthSuccess = () => {
+  const handleAuthSuccess = (
+    name: string,
+    email: string,
+    phone: string
+  ) => {
+    setBooking((prev) => ({
+      ...prev,
+      customerName: name,
+      customerEmail: email,
+      customerPhone: phone,
+    }));
     handleConfirmBooking();
   };
 
-  const handleConfirmBooking = () => {
-    toast.success("Booking Confirmed!", {
-      description: `Your ${booking.service?.name} appointment is scheduled for ${booking.date?.toLocaleDateString()} at ${booking.timeSlot}.`,
-    });
-    handleClose();
+  const handleConfirmBooking = async () => {
+    if (
+      !booking.serviceCategoryId ||
+      !booking.packageId ||
+      !booking.date ||
+      !booking.timeSlot ||
+      !booking.customerName ||
+      !booking.customerEmail ||
+      !booking.customerPhone
+    ) {
+      toast.error("Missing booking information");
+      return;
+    }
+
+    try {
+      // Combine date and time slot into ISO datetime
+      const [hours, minutes] = booking.timeSlot.split(":").map(Number);
+      const startTime = new Date(booking.date);
+      startTime.setHours(hours, minutes, 0, 0);
+
+      // Generate idempotency key
+      const idempotencyKey = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
+
+      await api.createBooking({
+        serviceCategoryId: booking.serviceCategoryId,
+        packageId: booking.packageId,
+        customerName: booking.customerName,
+        customerEmail: booking.customerEmail,
+        customerPhone: booking.customerPhone,
+        startTime: startTime.toISOString(),
+        idempotencyKey,
+      });
+
+      toast.success("Booking Confirmed!", {
+        description: `Your ${booking.packageName} appointment is scheduled for ${booking.date?.toLocaleDateString()} at ${booking.timeSlot}.`,
+      });
+      handleClose();
+    } catch (error: any) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to create booking";
+      toast.error("Booking Failed", {
+        description: errorMessage,
+      });
+    }
   };
 
   const handleBack = () => {
     switch (step) {
       case "subservice":
         setStep("service");
-        setBooking((prev) => ({ ...prev, category: null }));
+        setBooking((prev) => ({
+          ...prev,
+          serviceCategoryId: null,
+          serviceCategoryName: null,
+        }));
         break;
       case "datetime":
         setStep("subservice");
-        setBooking((prev) => ({ ...prev, service: null }));
+        setBooking((prev) => ({
+          ...prev,
+          packageId: null,
+          packageName: null,
+        }));
         break;
       case "auth":
         setStep("datetime");
-        setBooking((prev) => ({ ...prev, date: null, timeSlot: null }));
+        setBooking((prev) => ({
+          ...prev,
+          date: null,
+          timeSlot: null,
+        }));
         break;
     }
   };
 
   const handleClose = () => {
     setStep("service");
-    setBooking({ category: null, service: null, date: null, timeSlot: null });
+    setBooking({
+      serviceCategoryId: null,
+      serviceCategoryName: null,
+      packageId: null,
+      packageName: null,
+      date: null,
+      timeSlot: null,
+      customerName: null,
+      customerEmail: null,
+      customerPhone: null,
+    });
     onClose();
   };
 
@@ -103,7 +196,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
       case "service":
         return "Services";
       case "subservice":
-        return booking.category?.title || "Select Service";
+        return booking.serviceCategoryName || "Select Package";
       case "datetime":
         return "Select a time";
       case "auth":
@@ -158,21 +251,23 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
             {step === "service" && (
               <ServiceSelection
                 key="service"
-                categories={serviceCategories}
+                categories={servicesData?.services}
                 onSelectCategory={handleSelectCategory}
               />
             )}
-            {step === "subservice" && booking.category && (
+            {step === "subservice" && booking.serviceCategoryId && (
               <ServiceSelection
                 key="subservice"
-                selectedCategory={booking.category}
-                onSelectService={handleSelectService}
+                selectedCategoryId={booking.serviceCategoryId}
+                onSelectPackage={handleSelectPackage}
               />
             )}
-            {step === "datetime" && booking.service && (
+            {step === "datetime" && booking.packageId && booking.serviceCategoryId && (
               <DateTimeSelection
                 key="datetime"
-                service={booking.service}
+                packageId={booking.packageId}
+                serviceCategoryId={booking.serviceCategoryId}
+                packageName={booking.packageName || ""}
                 onSelectDateTime={handleSelectDateTime}
               />
             )}
