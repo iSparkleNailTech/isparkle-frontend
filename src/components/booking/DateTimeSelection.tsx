@@ -1,41 +1,32 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { format, isBefore, startOfDay } from "date-fns";
+import { format, addDays, isBefore, startOfDay } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/integrations/backend/api";
+import { ServiceItem } from "@/data/services";
 import { cn } from "@/lib/utils";
 
 interface DateTimeSelectionProps {
-  serviceCategoryId: string;
-  packageId: string;
-  packageName: string;
+  service: ServiceItem;
   onSelectDateTime: (date: Date, timeSlot: string) => void;
 }
 
-const DateTimeSelection = ({
-  serviceCategoryId,
-  packageId,
-  packageName,
-  onSelectDateTime,
-}: DateTimeSelectionProps) => {
+const timeSlots = [
+  "09:00",
+  "10:00",
+  "11:00",
+  "12:00",
+  "14:00",
+  "15:00",
+  "16:00",
+  "17:00",
+];
+
+const DateTimeSelection = ({ service, onSelectDateTime }: DateTimeSelectionProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
   const today = startOfDay(new Date());
-
-  // Fetch availability when date is selected
-  const dateString = selectedDate ? format(selectedDate, "yyyy-MM-dd") : null;
-  const { data: availabilityData, isLoading: isLoadingAvailability } = useQuery({
-    queryKey: ["availability", serviceCategoryId, packageId, dateString],
-    queryFn: () => {
-      if (!dateString) throw new Error("Date is required");
-      return api.getAvailability(serviceCategoryId, packageId, dateString);
-    },
-    enabled: !!dateString && !!selectedDate,
-  });
 
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
@@ -52,12 +43,6 @@ const DateTimeSelection = ({
     }
   };
 
-  // Format time slots from ISO strings to HH:mm
-  const formatTimeSlot = (isoString: string): string => {
-    const date = new Date(isoString);
-    return format(date, "HH:mm");
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
@@ -67,7 +52,10 @@ const DateTimeSelection = ({
     >
       {/* Service Info */}
       <div className="mb-6 p-4 rounded-lg bg-card border border-border/50">
-        <h3 className="font-body font-semibold text-foreground text-lg">{packageName}</h3>
+        <h3 className="font-body font-semibold text-foreground text-lg">{service.name}</h3>
+        <p className="text-sm text-muted-foreground mt-1 font-body">
+          {service.duration} · {service.price}
+        </p>
       </div>
 
       {/* Calendar and Time Grid */}
@@ -90,36 +78,22 @@ const DateTimeSelection = ({
               <h4 className="font-medium text-foreground mb-4">
                 {format(selectedDate, "EEEE d MMMM")}
               </h4>
-              {isLoadingAvailability ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                </div>
-              ) : availabilityData?.slots && availabilityData.slots.length > 0 ? (
-                <div className="grid grid-cols-2 gap-2">
-                  {availabilityData.slots.map((slot) => {
-                    const time = formatTimeSlot(slot.startTime);
-                    return (
-                      <button
-                        key={slot.startTime}
-                        onClick={() => handleTimeSelect(time)}
-                        className={cn(
-                          "py-3 px-4 rounded-lg border transition-all text-center font-medium",
-                          selectedTime === time
-                            ? "border-primary bg-primary/10 text-primary"
-                            : "border-border/50 bg-card text-foreground hover:border-primary/50"
-                        )}
-                      >
-                        {time}
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>No available time slots for this date.</p>
-                  <p className="text-sm mt-2">Please select another date.</p>
-                </div>
-              )}
+              <div className="grid grid-cols-2 gap-2">
+                {timeSlots.map((time) => (
+                  <button
+                    key={time}
+                    onClick={() => handleTimeSelect(time)}
+                    className={cn(
+                      "py-3 px-4 rounded-lg border transition-all text-center font-medium",
+                      selectedTime === time
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border/50 bg-card text-foreground hover:border-primary/50"
+                    )}
+                  >
+                    {time}
+                  </button>
+                ))}
+              </div>
             </>
           ) : (
             <div className="flex items-center justify-center h-full text-muted-foreground">

@@ -1,77 +1,84 @@
 import { motion } from "framer-motion";
-import { Sparkles, Heart, Sun, Scissors, Eye, Package, EyeClosed, Sprout, Loader2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/integrations/backend/api";
-import type { ServiceCategoryResponse } from "@/types/booking";
+import { Sparkles, Heart, Sun, Scissors, Eye, Package, EyeClosed, Sprout } from "lucide-react";
 
-// Map service category names to icons
-const getServiceIcon = (name: string) => {
-  const nameLower = name.toLowerCase();
-  if (nameLower.includes("nail")) return Sparkles;
-  if (nameLower.includes("pedicure")) return Heart;
-  if (nameLower.includes("facial")) return Sun;
-  if (nameLower.includes("massage")) return Sprout;
-  if (nameLower.includes("wax")) return Scissors;
-  if (nameLower.includes("lash") || nameLower.includes("eyelash")) return EyeClosed;
-  return Package; // Default icon
-};
-
-// Default descriptions for service categories
-const getServiceDescription = (name: string): string => {
-  const nameLower = name.toLowerCase();
-  if (nameLower.includes("nail")) {
-    return "Acrylic, Gel Builder (BIAB), Hard Gel, Nail Polishes, Nail Art & Manicure services";
-  }
-  if (nameLower.includes("pedicure")) {
-    return "Luxurious foot care treatments for ultimate relaxation";
-  }
-  if (nameLower.includes("facial")) {
-    return "Rejuvenating facial treatments for glowing skin";
-  }
-  if (nameLower.includes("massage")) {
-    return "Therapeutic massage treatments for body and mind";
-  }
-  if (nameLower.includes("wax")) {
-    return "Professional waxing services for smooth, flawless skin";
-  }
-  if (nameLower.includes("lash") || nameLower.includes("eyelash")) {
-    return "Beautiful lash extensions to enhance your eyes";
-  }
-  return "Additional beauty and wellness treatments";
-};
+const serviceCategories = [
+  {
+    icon: Sparkles,
+    title: "Nails",
+    description: "Acrylic, Gel Builder (BIAB), Hard Gel, Nail Polishes, Nail Art & Manicure services",
+    services: [
+      { name: "Acrylic Nails", price: "Varies" },
+      { name: "Gel Builder (BIAB)", price: "Varies" },
+      { name: "Hard Gel", price: "Varies" },
+      { name: "Nail Art & Manicure", price: "Varies" },
+    ],
+  },
+  {
+    icon: Heart,
+    title: "Pedicure",
+    description: "Luxurious foot care treatments for ultimate relaxation",
+    services: [
+      { name: "Classic Pedicure", price: "Varies" },
+      { name: "iSparkle Signature Pedicure with gel", price: "Premium" },
+      { name: "Jelly Pedicure", price: "Premium" },
+    ],
+  },
+  {
+    icon: Sun,
+    title: "Facials",
+    description: "Rejuvenating facial treatments for glowing skin",
+    services: [
+      { name: "Deep Cleansing Facial", price: "GH₵250" },
+      { name: "Hydra Facial", price: "GH₵300" },
+      { name: "Dermaplaning Facial", price: "GH₵300" },
+      { name: "High Frequency Facial", price: "GH₵300" },
+      { name: "Brightening Facial", price: "GH₵300" },
+    ],
+  },
+  {
+    icon: Sprout,
+    title: "Massages",
+    description: "Therapeutic massage treatments for body and mind",
+    services: [
+      { name: "Swedish Massage", price: "GH₵250" },
+      { name: "Deep Tissue Massage", price: "GH₵300" },
+      { name: "Hot Stone Massage", price: "GH₵400" },
+      { name: "Back & Neck Massage", price: "GH₵150" },
+    ],
+  },
+  {
+    icon: Scissors,
+    title: "Waxing",
+    description: "Professional waxing services for smooth, flawless skin",
+    services: [
+      { name: "Eye Brow", price: "GH₵70" },
+      { name: "Chin", price: "GH₵70" },
+      { name: "Upper Lip", price: "GH₵50" },
+      { name: "Bikini", price: "GH₵200" },
+      { name: "Back", price: "GH₵400" },
+      { name: "Leg", price: "GH₵250" },
+    ],
+  },
+  {
+    icon: EyeClosed,
+    title: "Mink Eyelashes",
+    description: "Beautiful lash extensions to enhance your eyes",
+    services: [
+      { name: "Classic Lashes", price: "Varies" },
+      { name: "Hybrid Lashes", price: "Varies" },
+      { name: "Cat Eye Lashes", price: "Varies" },
+      { name: "Volume Mink Lashes", price: "Varies" },
+    ],
+  },
+  {
+    icon: Package,
+    title: "Other Services",
+    description: "Additional beauty and wellness treatments",
+    services: [{ name: "Cavitation Treatment", price: "GH₵400/session" }],
+  },
+];
 
 const Services = () => {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["services"],
-    queryFn: () => api.getServices(),
-  });
-
-  if (isLoading) {
-    return (
-      <section id="services" className="py-24 bg-black-light relative">
-        <div className="container px-4">
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (error) {
-    return (
-      <section id="services" className="py-24 bg-black-light relative">
-        <div className="container px-4">
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Unable to load services. Please try again later.</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  const serviceCategories = data?.services || [];
-
   return (
     <section id="services" className="py-24 bg-black-light relative">
       {/* Background accent */}
@@ -94,54 +101,39 @@ const Services = () => {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {serviceCategories.map((category: ServiceCategoryResponse, index: number) => {
-            const Icon = getServiceIcon(category.name);
-            const description = getServiceDescription(category.name);
-            
-            return (
-              <motion.div
-                key={category._id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                whileHover={{ y: -8 }}
-                className="group"
-              >
-                <div className="h-full p-8 rounded-xl bg-card border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-gold">
-                  <div className="w-14 h-14 rounded-lg bg-gradient-gold flex items-center justify-center mb-6 group-hover:shadow-gold transition-shadow">
-                    <Icon className="w-7 h-7 text-primary-foreground" />
-                  </div>
-
-                  <h3 className="font-heading text-2xl font-semibold text-foreground mb-3">{category.name}</h3>
-
-                  <p className="text-cream mb-6 leading-relaxed text-sm">{description}</p>
-
-                  <div className="space-y-2 pt-4 border-t border-border/50">
-                    {category.packages && category.packages.length > 0 ? (
-                      <>
-                        {category.packages.slice(0, 6).map((pkg) => (
-                          <div key={pkg._id} className="flex items-center justify-between text-sm">
-                            <span className="text-muted-foreground">{pkg.name}</span>
-                            <span className="text-primary font-semibold">GH₵{pkg.price.toFixed(0)}</span>
-                          </div>
-                        ))}
-                        {category.packages.length > 6 && (
-                          <p className="text-muted-foreground text-xs pt-2">
-                            + {category.packages.length - 4} more {category.packages.length - 4 === 1 ? 'service' : 'services'}
-                          </p>
-                        )}
-                      </>
-                    ) : (
-                      <p className="text-muted-foreground text-sm">
-                        Duration: {category.defaultDurationMinutes} minutes
-                      </p>
-                    )}
-                  </div>
+          {serviceCategories.map((category, index) => (
+            <motion.div
+              key={category.title}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              whileHover={{ y: -8 }}
+              className="group"
+            >
+              <div className="h-full p-8 rounded-xl bg-card border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-gold">
+                <div className="w-14 h-14 rounded-lg bg-gradient-gold flex items-center justify-center mb-6 group-hover:shadow-gold transition-shadow">
+                  <category.icon className="w-7 h-7 text-primary-foreground" />
                 </div>
-              </motion.div>
-            );
-          })}
+
+                <h3 className="font-heading text-2xl font-semibold text-foreground mb-3">{category.title}</h3>
+
+                <p className="text-cream mb-6 leading-relaxed text-sm">{category.description}</p>
+
+                <div className="space-y-2 pt-4 border-t border-border/50">
+                  {category.services.slice(0, 4).map((service) => (
+                    <div key={service.name} className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">{service.name}</span>
+                      <span className="text-primary font-semibold">{service.price}</span>
+                    </div>
+                  ))}
+                  {category.services.length > 4 && (
+                    <p className="text-muted-foreground text-xs pt-2">+ {category.services.length - 4} more services</p>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          ))}
         </div>
 
         {/* Products note */}
