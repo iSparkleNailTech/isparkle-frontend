@@ -191,8 +191,8 @@ const AdminCalendar = () => {
             </div>
           </div>
 
-          {/* All Weeks in Month Selector - Scrollable */}
-          <div className="space-y-2 max-h-32 overflow-y-auto">
+          {/* All Weeks in Month Selector - Full view without scroll */}
+          <div className="space-y-1">
             {weeksInMonth.map((weekStart, weekIdx) => {
               const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
               return (
@@ -206,15 +206,15 @@ const AdminCalendar = () => {
                         key={idx}
                         onClick={() => setSelectedDay(day)}
                         className={cn(
-                          "flex flex-col items-center gap-0.5 py-1 px-2 rounded-full transition-all min-w-[36px]",
+                          "flex flex-col items-center py-0.5 px-1.5 rounded-full transition-all min-w-[32px]",
                           isSelected(day) && "bg-foreground text-background",
                           isToday(day) && !isSelected(day) && "text-rose-500 font-bold",
                           !inMonth && "opacity-40"
                         )}
                       >
-                        <span className="text-[10px] font-medium">{dayOfWeek}</span>
+                        <span className="text-[9px] font-medium leading-tight">{dayOfWeek}</span>
                         <span className={cn(
-                          "text-sm font-semibold",
+                          "text-xs font-semibold leading-tight",
                           isToday(day) && !isSelected(day) && "text-rose-500"
                         )}>
                           {dayNum}
@@ -231,12 +231,12 @@ const AdminCalendar = () => {
         {/* Mobile Calendar Grid - 2 Day View */}
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
           {/* Day Headers */}
-          <div className="grid grid-cols-[50px_1fr_1fr] border-b bg-muted/30 flex-shrink-0">
-            <div className="p-2 text-xs text-muted-foreground"></div>
+          <div className="grid grid-cols-[40px_1fr_1fr] border-b bg-muted/30 flex-shrink-0">
+            <div className="p-1 text-[10px] text-muted-foreground"></div>
             {mobileDays.map((day, idx) => (
-              <div key={idx} className="p-3 text-center border-l">
-                <div className="text-sm font-medium">
-                  {format(day, 'EEE')} – {format(day, 'd MMM')}
+              <div key={idx} className="py-1.5 px-1 text-center border-l">
+                <div className="text-xs font-medium">
+                  {format(day, 'EEE')} – {format(day, 'd')}
                 </div>
               </div>
             ))}
@@ -249,8 +249,8 @@ const AdminCalendar = () => {
               const bookingsDay2 = getBookingsForDayAndHour(mobileDays[1], hour);
 
               return (
-                <div key={hour} className="grid grid-cols-[50px_1fr_1fr] min-h-[80px]">
-                  <div className="p-2 text-xs text-muted-foreground font-medium border-b flex items-start justify-end pr-2 pt-1">
+                <div key={hour} className="grid grid-cols-[40px_1fr_1fr] min-h-[48px]">
+                  <div className="px-1 py-0.5 text-[10px] text-muted-foreground font-medium border-b flex items-start justify-end pr-1">
                     {format(new Date().setHours(hour, 0), 'HH:mm')}
                   </div>
                   {mobileDays.map((day, dayIdx) => {
@@ -259,7 +259,7 @@ const AdminCalendar = () => {
                       <div
                         key={dayIdx}
                         className={cn(
-                          "border-l border-b p-1 relative",
+                          "border-l border-b p-0.5 relative",
                           isToday(day) && "bg-muted/30"
                         )}
                       >
@@ -270,17 +270,17 @@ const AdminCalendar = () => {
                               key={booking.id}
                               onClick={() => setSelectedBooking(booking)}
                               className={cn(
-                                "rounded-lg p-2 cursor-pointer border-l-4 transition-all h-full min-h-[70px]",
+                                "rounded p-1 cursor-pointer border-l-2 transition-all h-full min-h-[40px]",
                                 config.bgClass,
                                 config.borderClass
                               )}
                             >
-                              <div className={cn("font-semibold text-sm mb-1", config.textClass)}>
+                              <div className={cn("font-semibold text-xs leading-tight", config.textClass)}>
                                 {booking.serviceName}
                               </div>
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Clock className="h-3 w-3" />
-                                {booking.bookingTime} - {formatEndTime(booking.bookingTime, booking.duration)}
+                              <div className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                                <Clock className="h-2.5 w-2.5" />
+                                {booking.bookingTime}
                               </div>
                             </div>
                           );
