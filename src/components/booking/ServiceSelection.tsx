@@ -1,21 +1,19 @@
 import { motion } from "framer-motion";
-import { ChevronRight, Loader2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/integrations/backend/api";
-import type { ServiceCategoryResponse, PackageResponse } from "@/types/booking";
+import { ChevronRight } from "lucide-react";
+import { ServiceCategory, ServiceItem } from "@/data/services";
 
 interface ServiceSelectionProps {
-  categories?: ServiceCategoryResponse[];
-  selectedCategoryId?: string;
-  onSelectCategory?: (category: ServiceCategoryResponse) => void;
-  onSelectPackage?: (pkg: PackageResponse, serviceCategoryId: string) => void;
+  categories?: ServiceCategory[];
+  selectedCategory?: ServiceCategory;
+  onSelectCategory?: (category: ServiceCategory) => void;
+  onSelectService?: (service: ServiceItem) => void;
 }
 
 const ServiceSelection = ({
   categories,
-  selectedCategoryId,
+  selectedCategory,
   onSelectCategory,
-  onSelectPackage,
+  onSelectService,
 }: ServiceSelectionProps) => {
   // Show category list as cards
   if (categories && onSelectCategory) {
@@ -28,17 +26,17 @@ const ServiceSelection = ({
       >
         {categories.map((category) => (
           <button
-            key={category._id}
+            key={category.title}
             onClick={() => onSelectCategory(category)}
             className="w-full p-4 rounded-lg bg-card border border-border/50 hover:border-primary/50 transition-all text-left group"
           >
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <h4 className="font-body font-medium text-foreground">
-                  {category.name}
+                  {category.title}
                 </h4>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {category.packages.length} services available
+                  {category.services.length} services available
                 </p>
               </div>
               <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -49,54 +47,8 @@ const ServiceSelection = ({
     );
   }
 
-  // Show packages for selected category
-  if (selectedCategoryId && onSelectPackage) {
-    const { data, isLoading, error } = useQuery({
-      queryKey: ["packages", selectedCategoryId],
-      queryFn: () => api.getPackages(selectedCategoryId),
-    });
-
-    if (isLoading) {
-      return (
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: 20 }}
-          className="p-4 flex items-center justify-center py-12"
-        >
-          <Loader2 className="w-6 h-6 animate-spin text-primary" />
-        </motion.div>
-      );
-    }
-
-    if (error) {
-      return (
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: 20 }}
-          className="p-4 text-center py-12"
-        >
-          <p className="text-muted-foreground">Unable to load packages. Please try again.</p>
-        </motion.div>
-      );
-    }
-
-    const packages = data?.packages || [];
-
-    if (packages.length === 0) {
-      return (
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: 20 }}
-          className="p-4 text-center py-12"
-        >
-          <p className="text-muted-foreground">No packages available for this service.</p>
-        </motion.div>
-      );
-    }
-
+  // Show sub-services for selected category
+  if (selectedCategory && onSelectService) {
     return (
       <motion.div
         initial={{ opacity: 0, x: -20 }}
@@ -104,43 +56,25 @@ const ServiceSelection = ({
         exit={{ opacity: 0, x: 20 }}
         className="p-4 space-y-2 font-body"
       >
-        {packages.map((pkg) => {
-          const formatDuration = (minutes: number | null | undefined): string => {
-            const mins = minutes ?? categories?.find((c) => c._id === selectedCategoryId)?.defaultDurationMinutes ?? 0;
-            if (mins >= 60) {
-              const hours = Math.floor(mins / 60);
-              const remainingMins = mins % 60;
-              if (remainingMins === 0) {
-                return `${hours} hr`;
-              }
-              return `${hours} hr ${remainingMins} mins`;
-            }
-            return `${mins} mins`;
-          };
-
-          const duration = formatDuration(pkg.durationMinutes);
-          const price = `GH₵${pkg.price.toFixed(0)}`;
-
-          return (
-            <button
-              key={pkg._id}
-              onClick={() => onSelectPackage(pkg, selectedCategoryId)}
-              className="w-full p-4 rounded-lg bg-card border border-border/50 hover:border-primary/50 transition-all text-left group"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <h4 className="font-body font-medium text-foreground mb-1">
-                    {pkg.name}
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    {duration} · <span className="font-semibold text-foreground">{price}</span>
-                  </p>
-                </div>
-                <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+        {selectedCategory.services.map((service) => (
+          <button
+            key={service.name}
+            onClick={() => onSelectService(service)}
+            className="w-full p-4 rounded-lg bg-card border border-border/50 hover:border-primary/50 transition-all text-left group"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <h4 className="font-body font-medium text-foreground mb-1">
+                  {service.name}
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  {service.duration} · <span className="font-semibold text-foreground">{service.price}</span>
+                </p>
               </div>
-            </button>
-          );
-        })}
+              <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+            </div>
+          </button>
+        ))}
       </motion.div>
     );
   }
