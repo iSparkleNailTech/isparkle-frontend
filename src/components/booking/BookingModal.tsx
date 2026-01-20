@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft } from "lucide-react";
-import { serviceCategories, ServiceCategory, ServiceItem } from "@/data/services";
+import { useQuery } from "@tanstack/react-query";
 import ServiceSelection from "./ServiceSelection";
 import DateTimeSelection from "./DateTimeSelection";
 import AuthStep from "./AuthStep";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
+import { api } from "@/integrations/backend/api";
+import type { ServiceCategoryResponse, PackageResponse } from "@/types/booking";
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -17,25 +19,53 @@ interface BookingModalProps {
 export type BookingStep = "service" | "subservice" | "datetime" | "auth";
 
 export interface BookingState {
-  category: ServiceCategory | null;
-  service: ServiceItem | null;
+  serviceCategoryId: string | null;
+  serviceCategoryName: string | null;
+  packageId: string | null;
+  packageName: string | null;
   date: Date | null;
   timeSlot: string | null;
+  customerName: string | null;
+  customerEmail: string | null;
+  customerPhone: string | null;
 }
 
 const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
   const [step, setStep] = useState<BookingStep>("service");
   const [booking, setBooking] = useState<BookingState>({
-    category: null,
-    service: null,
+    serviceCategoryId: null,
+    serviceCategoryName: null,
+    packageId: null,
+    packageName: null,
     date: null,
     timeSlot: null,
+    customerName: null,
+    customerEmail: null,
+    customerPhone: null,
   });
   const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<{ name: string; email: string; phone?: string } | null>(null);
+
+  const { data: servicesData } = useQuery({
+    queryKey: ["services"],
+    queryFn: () => api.getServices(),
+    enabled: isOpen,
+  });
+
+  // Fetch user profile when authenticated
+  const { data: userData } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: () => api.getCurrentUser(),
+    enabled: !!user && isOpen,
+    retry: false,
+  });
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_, session) => {
       setUser(session?.user ?? null);
+      if (!session?.user) {
+        setUserProfile(null);
+      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -45,56 +75,176 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleSelectCategory = (category: ServiceCategory) => {
-    setBooking((prev) => ({ ...prev, category }));
+  // Update user profile when user data is fetched
+  useEffect(() => {
+    if (userData?.user) {
+      setUserProfile({
+        name: userData.user.name,
+        email: userData.user.email,
+        phone: userData.user.phone,
+      });
+    }
+  }, [userData]);
+
+  const handleSelectCategory = (category: ServiceCategoryResponse) => {
+    setBooking((prev) => ({
+      ...prev,
+      serviceCategoryId: category._id,
+      serviceCategoryName: category.name,
+    }));
     setStep("subservice");
   };
 
-  const handleSelectService = (service: ServiceItem) => {
-    setBooking((prev) => ({ ...prev, service }));
+  const handleSelectPackage = (pkg: PackageResponse, serviceCategoryId: string) => {
+    setBooking((prev) => ({
+      ...prev,
+      packageId: pkg._id,
+      packageName: pkg.name,
+    }));
     setStep("datetime");
   };
 
   const handleSelectDateTime = (date: Date, timeSlot: string) => {
     setBooking((prev) => ({ ...prev, date, timeSlot }));
-    if (user) {
-      handleConfirmBooking();
+
+    // If user is authenticated and has profile, skip auth step and confirm immediately.
+    // Pass overrides: setState is async so booking would still be stale inside handleConfirmBooking.
+    if (user && userProfile) {
+      handleConfirmBooking({
+        date,
+        timeSlot,
+        customerName: userProfile.name,
+        customerEmail: userProfile.email,
+        customerPhone: userProfile.phone || "",
+      });
     } else {
       setStep("auth");
     }
   };
 
-  const handleAuthSuccess = () => {
-    handleConfirmBooking();
+  const handleAuthSuccess = async (
+    name: string,
+    email: string,
+    phone: string
+  ) => {
+    // If user just authenticated, fetch their profile to ensure backend has it
+    if (user) {
+      try {
+        await api.getCurrentUser();
+      } catch (error) {
+        // User profile will be created automatically by backend on first request
+      }
+    }
+
+    // Pass overrides: setState is async so booking would still be stale inside handleConfirmBooking
+    handleConfirmBooking({
+      customerName: name,
+      customerEmail: email,
+      customerPhone: phone,
+    });
   };
 
-  const handleConfirmBooking = () => {
-    toast.success("Booking Confirmed!", {
-      description: `Your ${booking.service?.name} appointment is scheduled for ${booking.date?.toLocaleDateString()} at ${booking.timeSlot}.`,
-    });
-    handleClose();
+  const handleConfirmBooking = async (overrides?: Partial<BookingState>) => {
+    const b = { ...booking, ...overrides };
+
+    if (
+      !b.serviceCategoryId ||
+      !b.packageId ||
+      !b.date ||
+      !b.timeSlot
+    ) {
+      toast.error("Missing booking information");
+      return;
+    }
+
+    // For authenticated users, customer fields are optional
+    // For guest bookings, customer fields are required
+    if (!user && (!b.customerName || !b.customerEmail || !b.customerPhone)) {
+      toast.error("Please provide your contact information");
+      return;
+    }
+
+    try {
+      // Combine date and time slot into ISO datetime
+      const [hours, minutes] = b.timeSlot.split(":").map(Number);
+      const startTime = new Date(b.date);
+      startTime.setHours(hours, minutes, 0, 0);
+
+      // Generate idempotency key
+      const idempotencyKey = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
+
+      // Build booking request
+      const bookingRequest: any = {
+        serviceCategoryId: b.serviceCategoryId,
+        packageId: b.packageId,
+        startTime: startTime.toISOString(),
+        idempotencyKey,
+      };
+
+      // Add customer fields only for guest bookings
+      if (!user) {
+        bookingRequest.customerName = b.customerName;
+        bookingRequest.customerEmail = b.customerEmail;
+        bookingRequest.customerPhone = b.customerPhone;
+      }
+
+      await api.createBooking(bookingRequest);
+
+      toast.success("Booking Confirmed!", {
+        description: `Your ${b.packageName} appointment is scheduled for ${b.date?.toLocaleDateString()} at ${b.timeSlot}.`,
+      });
+      handleClose();
+    } catch (error: any) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to create booking";
+      toast.error("Booking Failed", {
+        description: errorMessage,
+      });
+    }
   };
 
   const handleBack = () => {
     switch (step) {
       case "subservice":
         setStep("service");
-        setBooking((prev) => ({ ...prev, category: null }));
+        setBooking((prev) => ({
+          ...prev,
+          serviceCategoryId: null,
+          serviceCategoryName: null,
+        }));
         break;
       case "datetime":
         setStep("subservice");
-        setBooking((prev) => ({ ...prev, service: null }));
+        setBooking((prev) => ({
+          ...prev,
+          packageId: null,
+          packageName: null,
+        }));
         break;
       case "auth":
         setStep("datetime");
-        setBooking((prev) => ({ ...prev, date: null, timeSlot: null }));
+        setBooking((prev) => ({
+          ...prev,
+          date: null,
+          timeSlot: null,
+        }));
         break;
     }
   };
 
   const handleClose = () => {
     setStep("service");
-    setBooking({ category: null, service: null, date: null, timeSlot: null });
+    setBooking({
+      serviceCategoryId: null,
+      serviceCategoryName: null,
+      packageId: null,
+      packageName: null,
+      date: null,
+      timeSlot: null,
+      customerName: null,
+      customerEmail: null,
+      customerPhone: null,
+    });
     onClose();
   };
 
@@ -103,7 +253,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
       case "service":
         return "Services";
       case "subservice":
-        return booking.category?.title || "Select Service";
+        return booking.serviceCategoryName || "Select Package";
       case "datetime":
         return "Select a time";
       case "auth":
@@ -158,21 +308,23 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
             {step === "service" && (
               <ServiceSelection
                 key="service"
-                categories={serviceCategories}
+                categories={servicesData?.services}
                 onSelectCategory={handleSelectCategory}
               />
             )}
-            {step === "subservice" && booking.category && (
+            {step === "subservice" && booking.serviceCategoryId && (
               <ServiceSelection
                 key="subservice"
-                selectedCategory={booking.category}
-                onSelectService={handleSelectService}
+                selectedCategoryId={booking.serviceCategoryId}
+                onSelectPackage={handleSelectPackage}
               />
             )}
-            {step === "datetime" && booking.service && (
+            {step === "datetime" && booking.packageId && booking.serviceCategoryId && (
               <DateTimeSelection
                 key="datetime"
-                service={booking.service}
+                packageId={booking.packageId}
+                serviceCategoryId={booking.serviceCategoryId}
+                packageName={booking.packageName || ""}
                 onSelectDateTime={handleSelectDateTime}
               />
             )}
