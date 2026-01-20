@@ -249,7 +249,7 @@ const AdminCalendar = () => {
               const bookingsDay2 = getBookingsForDayAndHour(mobileDays[1], hour);
 
               return (
-                <div key={hour} className="grid grid-cols-[50px_1fr_1fr] min-h-[60px]">
+                <div key={hour} className="grid grid-cols-[50px_1fr_1fr] min-h-[48px]">
                   <div className="p-2 text-xs text-muted-foreground font-medium border-b flex items-start justify-end pr-2 pt-1">
                     {format(new Date().setHours(hour, 0), 'HH:mm')}
                   </div>
@@ -270,7 +270,7 @@ const AdminCalendar = () => {
                               key={booking.id}
                               onClick={() => setSelectedBooking(booking)}
                               className={cn(
-                                "rounded-lg p-1.5 cursor-pointer border-l-4 transition-all h-full min-h-[50px]",
+                                "rounded p-1 cursor-pointer border-l-4 transition-all h-full min-h-[40px]",
                                 config.bgClass,
                                 config.borderClass
                               )}
