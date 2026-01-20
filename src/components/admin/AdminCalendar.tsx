@@ -134,9 +134,9 @@ const AdminCalendar = () => {
   if (isMobile) {
     return (
       <div className="h-screen bg-background flex flex-col overflow-hidden">
-        {/* Mobile Header */}
-        <div className="bg-background p-4 border-b flex-shrink-0">
-          <div className="flex items-center justify-between mb-4">
+        {/* Mobile Header - 1/3 of screen */}
+        <div className="bg-background border-b flex-shrink-0 h-1/3 flex flex-col">
+          <div className="flex items-center justify-between p-3">
             <Popover open={monthPickerOpen} onOpenChange={setMonthPickerOpen}>
               <PopoverTrigger asChild>
                 <Button 
@@ -177,7 +177,7 @@ const AdminCalendar = () => {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="rounded-full"
+                className="rounded-full text-xs"
                 onClick={goToToday}
               >
                 Today
@@ -191,12 +191,12 @@ const AdminCalendar = () => {
             </div>
           </div>
 
-          {/* All Weeks in Month Selector - Scrollable */}
-          <div className="space-y-2 max-h-32 overflow-y-auto">
+          {/* All Weeks in Month - Fills remaining header space */}
+          <div className="flex-1 overflow-y-auto px-2 pb-2">
             {weeksInMonth.map((weekStart, weekIdx) => {
               const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
               return (
-                <div key={weekIdx} className="flex justify-between">
+                <div key={weekIdx} className="flex justify-between py-1">
                   {days.map((day, idx) => {
                     const dayOfWeek = format(day, 'EEEEE');
                     const dayNum = format(day, 'd');
@@ -206,15 +206,15 @@ const AdminCalendar = () => {
                         key={idx}
                         onClick={() => setSelectedDay(day)}
                         className={cn(
-                          "flex flex-col items-center gap-0.5 py-1 px-2 rounded-full transition-all min-w-[36px]",
+                          "flex flex-col items-center gap-0 py-0.5 px-1.5 rounded-full transition-all min-w-[32px]",
                           isSelected(day) && "bg-foreground text-background",
                           isToday(day) && !isSelected(day) && "text-rose-500 font-bold",
                           !inMonth && "opacity-40"
                         )}
                       >
-                        <span className="text-[10px] font-medium">{dayOfWeek}</span>
+                        <span className="text-[9px] font-medium leading-tight">{dayOfWeek}</span>
                         <span className={cn(
-                          "text-sm font-semibold",
+                          "text-xs font-semibold leading-tight",
                           isToday(day) && !isSelected(day) && "text-rose-500"
                         )}>
                           {dayNum}
