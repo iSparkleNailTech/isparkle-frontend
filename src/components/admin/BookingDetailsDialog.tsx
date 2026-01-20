@@ -62,7 +62,7 @@ const BookingDetailsDialog = ({ booking, onClose }: BookingDetailsDialogProps) =
         <div className="space-y-6 pt-4">
           {/* Customer Info */}
           <div>
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 font-body">
               Customer Information
             </h3>
             <div className="space-y-3">
@@ -76,7 +76,7 @@ const BookingDetailsDialog = ({ booking, onClose }: BookingDetailsDialogProps) =
 
           {/* Service Info */}
           <div>
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 font-body">
               Service Details
             </h3>
             <div className="space-y-3">
@@ -91,7 +91,7 @@ const BookingDetailsDialog = ({ booking, onClose }: BookingDetailsDialogProps) =
 
           {/* Booking Info */}
           <div>
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 font-body">
               Appointment
             </h3>
             <div className="space-y-3">
@@ -108,7 +108,7 @@ const BookingDetailsDialog = ({ booking, onClose }: BookingDetailsDialogProps) =
             <>
               <Separator />
               <div>
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 font-body">
                   Notes
                 </h3>
                 <p className="text-sm text-muted-foreground bg-muted p-3 rounded-lg">
