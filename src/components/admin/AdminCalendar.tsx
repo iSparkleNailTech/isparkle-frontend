@@ -1,44 +1,78 @@
-import { useState, useMemo } from 'react';
-import { format, startOfWeek, startOfMonth, endOfMonth, addDays, isSameDay, isSameMonth, addMonths, subMonths, eachWeekOfInterval, setMonth, setYear, getMonth, getYear } from 'date-fns';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Filter, Settings, Check, X, Clock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { mockBookings, Booking, BookingStatus } from '@/data/mockBookings';
-import BookingDetailsDialog from './BookingDetailsDialog';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useState, useMemo } from "react";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  format,
+  startOfWeek,
+  startOfMonth,
+  endOfMonth,
+  addDays,
+  isSameDay,
+  isSameMonth,
+  addMonths,
+  subMonths,
+  eachWeekOfInterval,
+  setMonth,
+  setYear,
+  getMonth,
+  getYear,
+} from "date-fns";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar as CalendarIcon,
+  List,
+  Filter,
+  Settings,
+  Check,
+  X,
+  Clock,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { mockBookings, Booking, BookingStatus } from "@/data/mockBookings";
+import BookingDetailsDialog from "./BookingDetailsDialog";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 8); // 8 AM to 7 PM
 
 const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
-const statusConfig: Record<BookingStatus, { label: string; bgClass: string; textClass: string; borderClass: string; icon: typeof Check }> = {
+const statusConfig: Record<
+  BookingStatus,
+  { label: string; bgClass: string; textClass: string; borderClass: string; icon: typeof Check }
+> = {
   completed: {
-    label: 'Completed',
-    bgClass: 'bg-emerald-50',
-    textClass: 'text-emerald-700',
-    borderClass: 'border-l-emerald-500',
+    label: "Completed",
+    bgClass: "bg-emerald-50",
+    textClass: "text-emerald-700",
+    borderClass: "border-l-emerald-500",
     icon: Check,
   },
   pending: {
-    label: 'Scheduled',
-    bgClass: 'bg-fuchsia-50',
-    textClass: 'text-fuchsia-700',
-    borderClass: 'border-l-fuchsia-500',
+    label: "Scheduled",
+    bgClass: "bg-fuchsia-50",
+    textClass: "text-fuchsia-700",
+    borderClass: "border-l-fuchsia-500",
     icon: Clock,
   },
   cancelled: {
-    label: 'Cancelled',
-    bgClass: 'bg-rose-50',
-    textClass: 'text-rose-700',
-    borderClass: 'border-l-rose-500',
+    label: "Cancelled",
+    bgClass: "bg-rose-50",
+    textClass: "text-rose-700",
+    borderClass: "border-l-rose-500",
     icon: X,
   },
 };
@@ -46,7 +80,7 @@ const statusConfig: Record<BookingStatus, { label: string; bgClass: string; text
 const AdminCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-  const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
+  const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
   const [selectedDay, setSelectedDay] = useState(new Date());
   const [monthPickerOpen, setMonthPickerOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -64,26 +98,28 @@ const AdminCalendar = () => {
 
   const todayBookingsCount = useMemo(() => {
     const today = new Date();
-    return mockBookings.filter(b => isSameDay(new Date(b.bookingDate), today)).length;
+    return mockBookings.filter((b) => isSameDay(new Date(b.bookingDate), today)).length;
   }, []);
 
   const getBookingsForDayAndHour = (day: Date, hour: number): Booking[] => {
-    return mockBookings.filter(booking => {
+    return mockBookings.filter((booking) => {
       const bookingDate = new Date(booking.bookingDate);
-      const bookingHour = parseInt(booking.bookingTime.split(':')[0], 10);
+      const bookingHour = parseInt(booking.bookingTime.split(":")[0], 10);
       return isSameDay(bookingDate, day) && bookingHour === hour;
     });
   };
 
   const getBookingsForDay = (day: Date): Booking[] => {
-    return mockBookings.filter(booking => {
-      const bookingDate = new Date(booking.bookingDate);
-      return isSameDay(bookingDate, day);
-    }).sort((a, b) => a.bookingTime.localeCompare(b.bookingTime));
+    return mockBookings
+      .filter((booking) => {
+        const bookingDate = new Date(booking.bookingDate);
+        return isSameDay(bookingDate, day);
+      })
+      .sort((a, b) => a.bookingTime.localeCompare(b.bookingTime));
   };
 
   const parseTimeToMinutes = (time: string): number => {
-    const [hours, minutes] = time.split(':').map(Number);
+    const [hours, minutes] = time.split(":").map(Number);
     return hours * 60 + minutes;
   };
 
@@ -102,19 +138,19 @@ const AdminCalendar = () => {
     const endMinutes = startMinutes + durationMinutes;
     const endHours = Math.floor(endMinutes / 60);
     const endMins = endMinutes % 60;
-    return `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
+    return `${endHours.toString().padStart(2, "0")}:${endMins.toString().padStart(2, "0")}`;
   };
 
-  const navigateMonth = (direction: 'prev' | 'next') => {
-    setCurrentDate(prev => direction === 'prev' ? subMonths(prev, 1) : addMonths(prev, 1));
+  const navigateMonth = (direction: "prev" | "next") => {
+    setCurrentDate((prev) => (direction === "prev" ? subMonths(prev, 1) : addMonths(prev, 1)));
   };
 
-  const navigateWeek = (direction: 'prev' | 'next') => {
-    setCurrentDate(prev => direction === 'prev' ? addDays(prev, -7) : addDays(prev, 7));
+  const navigateWeek = (direction: "prev" | "next") => {
+    setCurrentDate((prev) => (direction === "prev" ? addDays(prev, -7) : addDays(prev, 7)));
   };
 
   const selectMonth = (monthIndex: number) => {
-    setCurrentDate(prev => setMonth(prev, monthIndex));
+    setCurrentDate((prev) => setMonth(prev, monthIndex));
     setMonthPickerOpen(false);
   };
 
@@ -133,28 +169,32 @@ const AdminCalendar = () => {
 
   if (isMobile) {
     return (
-      <div className="h-dvh bg-background flex flex-col overflow-hidden">
+      <div className="h-screen bg-background flex flex-col overflow-hidden">
         {/* Mobile Header - 1/3 of screen */}
-        <div className="bg-background border-b flex-shrink-0 h-1/3 flex flex-col">
+        <div className="bg-background border-b flex-shrink-0 h-4/10 flex flex-col">
           <div className="flex items-center justify-between p-3">
             <Popover open={monthPickerOpen} onOpenChange={setMonthPickerOpen}>
               <PopoverTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="rounded-full gap-1"
-                >
-                  {format(currentDate, 'MMMM yyyy')}
+                <Button variant="outline" size="sm" className="rounded-full gap-1">
+                  {format(currentDate, "MMMM yyyy")}
                   <ChevronRight className={cn("h-4 w-4 transition-transform", monthPickerOpen && "rotate-90")} />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-64 p-3" align="start">
                 <div className="flex items-center justify-between mb-3">
-                  <Button variant="ghost" size="icon" onClick={() => setCurrentDate(prev => setYear(prev, getYear(prev) - 1))}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setCurrentDate((prev) => setYear(prev, getYear(prev) - 1))}
+                  >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <span className="font-semibold">{getYear(currentDate)}</span>
-                  <Button variant="ghost" size="icon" onClick={() => setCurrentDate(prev => setYear(prev, getYear(prev) + 1))}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setCurrentDate((prev) => setYear(prev, getYear(prev) + 1))}
+                  >
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -174,12 +214,7 @@ const AdminCalendar = () => {
               </PopoverContent>
             </Popover>
             <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="rounded-full text-xs"
-                onClick={goToToday}
-              >
+              <Button variant="outline" size="sm" className="rounded-full text-xs" onClick={goToToday}>
                 Today
               </Button>
               <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -198,25 +233,27 @@ const AdminCalendar = () => {
               return (
                 <div key={weekIdx} className="flex justify-between py-1">
                   {days.map((day, idx) => {
-                    const dayOfWeek = format(day, 'EEEEE');
-                    const dayNum = format(day, 'd');
+                    const dayOfWeek = format(day, "EEEEE");
+                    const dayNum = format(day, "d");
                     const inMonth = isCurrentMonth(day);
                     return (
                       <button
                         key={idx}
                         onClick={() => setSelectedDay(day)}
                         className={cn(
-                          "flex flex-col items-center gap-0.5 py-1 px-2 rounded-full transition-all min-w-[36px]",
+                          "flex flex-col items-center gap-0 py-0.5 px-1.5 rounded-full transition-all min-w-[32px]",
                           isSelected(day) && "bg-foreground text-background",
                           isToday(day) && !isSelected(day) && "text-rose-500 font-bold",
-                          !inMonth && "opacity-40"
+                          !inMonth && "opacity-40",
                         )}
                       >
-                        <span className="text-[10px] font-medium">{dayOfWeek}</span>
-                        <span className={cn(
-                          "text-sm font-semibold",
-                          isToday(day) && !isSelected(day) && "text-rose-500"
-                        )}>
+                        <span className="text-[9px] font-medium leading-tight">{dayOfWeek}</span>
+                        <span
+                          className={cn(
+                            "text-xs font-semibold leading-tight",
+                            isToday(day) && !isSelected(day) && "text-rose-500",
+                          )}
+                        >
                           {dayNum}
                         </span>
                       </button>
@@ -236,7 +273,7 @@ const AdminCalendar = () => {
             {mobileDays.map((day, idx) => (
               <div key={idx} className="p-3 text-center border-l">
                 <div className="text-sm font-medium">
-                  {format(day, 'EEE')} – {format(day, 'd MMM')}
+                  {format(day, "EEE")} – {format(day, "d MMM")}
                 </div>
               </div>
             ))}
@@ -244,26 +281,20 @@ const AdminCalendar = () => {
 
           {/* Time Grid - Scrollable */}
           <div className="flex-1 overflow-y-auto min-h-0">
-            {HOURS.map(hour => {
+            {HOURS.map((hour) => {
               const bookingsDay1 = getBookingsForDayAndHour(mobileDays[0], hour);
               const bookingsDay2 = getBookingsForDayAndHour(mobileDays[1], hour);
 
               return (
                 <div key={hour} className="grid grid-cols-[50px_1fr_1fr] min-h-[80px]">
                   <div className="p-2 text-xs text-muted-foreground font-medium border-b flex items-start justify-end pr-2 pt-1">
-                    {format(new Date().setHours(hour, 0), 'HH:mm')}
+                    {format(new Date().setHours(hour, 0), "HH:mm")}
                   </div>
                   {mobileDays.map((day, dayIdx) => {
                     const bookings = dayIdx === 0 ? bookingsDay1 : bookingsDay2;
                     return (
-                      <div
-                        key={dayIdx}
-                        className={cn(
-                          "border-l border-b p-1 relative",
-                          isToday(day) && "bg-muted/30"
-                        )}
-                      >
-                        {bookings.map(booking => {
+                      <div key={dayIdx} className={cn("border-l border-b p-1 relative", isToday(day) && "bg-muted/30")}>
+                        {bookings.map((booking) => {
                           const config = statusConfig[booking.status];
                           return (
                             <div
@@ -272,7 +303,7 @@ const AdminCalendar = () => {
                               className={cn(
                                 "rounded-lg p-2 cursor-pointer border-l-4 transition-all h-full min-h-[70px]",
                                 config.bgClass,
-                                config.borderClass
+                                config.borderClass,
                               )}
                             >
                               <div className={cn("font-semibold text-sm mb-1", config.textClass)}>
@@ -294,10 +325,7 @@ const AdminCalendar = () => {
           </div>
         </div>
 
-        <BookingDetailsDialog
-          booking={selectedBooking}
-          onClose={() => setSelectedBooking(null)}
-        />
+        <BookingDetailsDialog booking={selectedBooking} onClose={() => setSelectedBooking(null)} />
       </div>
     );
   }
@@ -310,19 +338,19 @@ const AdminCalendar = () => {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2 bg-background rounded-full p-1 border">
             <Button
-              variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+              variant={viewMode === "list" ? "secondary" : "ghost"}
               size="sm"
               className="rounded-full gap-2"
-              onClick={() => setViewMode('list')}
+              onClick={() => setViewMode("list")}
             >
               <List className="h-4 w-4" />
               List
             </Button>
             <Button
-              variant={viewMode === 'calendar' ? 'secondary' : 'ghost'}
+              variant={viewMode === "calendar" ? "secondary" : "ghost"}
               size="sm"
               className="rounded-full gap-2"
-              onClick={() => setViewMode('calendar')}
+              onClick={() => setViewMode("calendar")}
             >
               <CalendarIcon className="h-4 w-4" />
               Calendar
@@ -331,14 +359,14 @@ const AdminCalendar = () => {
 
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" className="rounded-lg" onClick={() => navigateWeek('prev')}>
+              <Button variant="outline" size="icon" className="rounded-lg" onClick={() => navigateWeek("prev")}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <Button variant="outline" size="sm" className="rounded-lg gap-2">
                 <CalendarIcon className="h-4 w-4" />
-                {format(weekStart, 'MMMM d, yyyy')}
+                {format(weekStart, "MMMM d, yyyy")}
               </Button>
-              <Button variant="outline" size="icon" className="rounded-lg" onClick={() => navigateWeek('next')}>
+              <Button variant="outline" size="icon" className="rounded-lg" onClick={() => navigateWeek("next")}>
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
@@ -364,22 +392,16 @@ const AdminCalendar = () => {
         <div className="bg-background rounded-xl border overflow-hidden">
           {/* Header Row */}
           <div className="grid grid-cols-[80px_repeat(5,1fr)] border-b">
-            <div className="p-4 text-sm text-muted-foreground font-medium">
-              GMT+0
-            </div>
+            <div className="p-4 text-sm text-muted-foreground font-medium">GMT+0</div>
             {desktopDays.map((day, idx) => (
-              <div
-                key={idx}
-                className={cn(
-                  "p-4 text-center border-l",
-                  isToday(day) && "bg-primary/5"
-                )}
-              >
-                <div className={cn(
-                  "text-sm font-medium uppercase",
-                  isToday(day) ? "text-primary" : "text-muted-foreground"
-                )}>
-                  {format(day, 'EEE d')}
+              <div key={idx} className={cn("p-4 text-center border-l", isToday(day) && "bg-primary/5")}>
+                <div
+                  className={cn(
+                    "text-sm font-medium uppercase",
+                    isToday(day) ? "text-primary" : "text-muted-foreground",
+                  )}
+                >
+                  {format(day, "EEE d")}
                 </div>
               </div>
             ))}
@@ -387,22 +409,16 @@ const AdminCalendar = () => {
 
           {/* Time Rows */}
           <div className="max-h-[calc(100vh-280px)] overflow-y-auto">
-            {HOURS.map(hour => (
+            {HOURS.map((hour) => (
               <div key={hour} className="grid grid-cols-[80px_repeat(5,1fr)] min-h-[100px]">
                 <div className="p-4 text-sm text-muted-foreground font-medium border-b flex items-start justify-end pr-4">
-                  {format(new Date().setHours(hour, 0), 'HH:mm')}
+                  {format(new Date().setHours(hour, 0), "HH:mm")}
                 </div>
                 {desktopDays.map((day, dayIdx) => {
                   const bookings = getBookingsForDayAndHour(day, hour);
                   return (
-                    <div
-                      key={dayIdx}
-                      className={cn(
-                        "border-l border-b p-1 relative",
-                        isToday(day) && "bg-primary/5"
-                      )}
-                    >
-                      {bookings.map(booking => {
+                    <div key={dayIdx} className={cn("border-l border-b p-1 relative", isToday(day) && "bg-primary/5")}>
+                      {bookings.map((booking) => {
                         const config = statusConfig[booking.status];
                         const StatusIcon = config.icon;
                         return (
@@ -412,23 +428,21 @@ const AdminCalendar = () => {
                             className={cn(
                               "rounded-lg p-3 mb-1 cursor-pointer border-l-4 transition-all hover:shadow-md",
                               config.bgClass,
-                              config.borderClass
+                              config.borderClass,
                             )}
                           >
                             <div className="text-xs text-muted-foreground mb-1">
                               {booking.bookingTime} - {formatEndTime(booking.bookingTime, booking.duration)}
                             </div>
-                            <div className="font-medium text-sm text-foreground mb-0.5">
-                              {booking.customerName}
-                            </div>
-                            <div className="text-xs text-muted-foreground mb-2">
-                              {booking.serviceName}
-                            </div>
-                            <div className={cn(
-                              "inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium",
-                              config.bgClass,
-                              config.textClass
-                            )}>
+                            <div className="font-medium text-sm text-foreground mb-0.5">{booking.customerName}</div>
+                            <div className="text-xs text-muted-foreground mb-2">{booking.serviceName}</div>
+                            <div
+                              className={cn(
+                                "inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium",
+                                config.bgClass,
+                                config.textClass,
+                              )}
+                            >
                               <StatusIcon className="h-3 w-3" />
                               {config.label}
                             </div>
@@ -444,10 +458,7 @@ const AdminCalendar = () => {
         </div>
       </div>
 
-      <BookingDetailsDialog
-        booking={selectedBooking}
-        onClose={() => setSelectedBooking(null)}
-      />
+      <BookingDetailsDialog booking={selectedBooking} onClose={() => setSelectedBooking(null)} />
     </div>
   );
 };
