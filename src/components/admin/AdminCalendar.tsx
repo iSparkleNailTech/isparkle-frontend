@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
-import { format, startOfWeek, addDays, isSameDay, addWeeks, subWeeks } from 'date-fns';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Filter, Settings, Check, X, Clock } from 'lucide-react';
+import { format, startOfWeek, addDays, isSameDay, addWeeks, subWeeks, startOfMonth, endOfMonth, addMonths, subMonths, getDay } from 'date-fns';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Filter, Settings, Check, X, Clock, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { mockBookings, Booking, BookingStatus } from '@/data/mockBookings';
@@ -8,6 +8,7 @@ import BookingDetailsDialog from './BookingDetailsDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 8); // 8 AM to 7 PM
+const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 const statusConfig: Record<BookingStatus, { label: string; bgClass: string; textClass: string; borderClass: string; icon: typeof Check }> = {
   completed: {
@@ -103,124 +104,171 @@ const AdminCalendar = () => {
   // Get two days for mobile view (selected day + next day)
   const mobileDays = [selectedDay, addDays(selectedDay, 1)];
 
+  // Mobile month calendar helpers
+  const monthStart = startOfMonth(currentDate);
+  const monthEnd = endOfMonth(currentDate);
+  const startDayOfWeek = getDay(monthStart); // 0 = Sunday
+  
+  const calendarDays = useMemo(() => {
+    const days: (Date | null)[] = [];
+    // Add empty slots for days before month starts
+    for (let i = 0; i < startDayOfWeek; i++) {
+      days.push(null);
+    }
+    // Add all days of the month
+    let current = monthStart;
+    while (current <= monthEnd) {
+      days.push(current);
+      current = addDays(current, 1);
+    }
+    return days;
+  }, [currentDate, monthStart, monthEnd, startDayOfWeek]);
+
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    setCurrentDate(prev => direction === 'prev' ? subMonths(prev, 1) : addMonths(prev, 1));
+  };
+
+  const hasBookingsOnDay = (day: Date): { pending: boolean; completed: boolean; cancelled: boolean } => {
+    const dayBookings = getBookingsForDay(day);
+    return {
+      pending: dayBookings.some(b => b.status === 'pending'),
+      completed: dayBookings.some(b => b.status === 'completed'),
+      cancelled: dayBookings.some(b => b.status === 'cancelled'),
+    };
+  };
+
+  const selectedDayBookings = getBookingsForDay(selectedDay);
+
   if (isMobile) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
-        {/* Mobile Header */}
-        <div className="bg-background p-4 border-b">
+        {/* Month Calendar Header */}
+        <div className="bg-primary/90 text-primary-foreground p-4 rounded-b-3xl">
+          {/* Month Navigation */}
           <div className="flex items-center justify-between mb-4">
             <Button 
-              variant="outline" 
-              size="sm" 
-              className="rounded-full gap-1"
-              onClick={() => navigateWeek('prev')}
+              variant="ghost" 
+              size="icon"
+              className="text-primary-foreground hover:bg-primary-foreground/20"
+              onClick={() => navigateMonth('prev')}
             >
-              <ChevronLeft className="h-4 w-4" />
-              {format(weekStart, 'MMMM')}
+              <ChevronLeft className="h-5 w-5" />
             </Button>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Filter className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Settings className="h-4 w-4" />
-              </Button>
-            </div>
+            <button className="flex items-center gap-1 text-lg font-semibold font-body">
+              {format(currentDate, 'MMMM')}
+              <ChevronUp className="h-4 w-4" />
+            </button>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="text-primary-foreground hover:bg-primary-foreground/20"
+              onClick={() => navigateMonth('next')}
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
           </div>
 
-          {/* Week Selector */}
-          <div className="flex justify-between">
-            {weekDays.map((day, idx) => {
-              const dayOfWeek = format(day, 'EEEEE');
-              const dayNum = format(day, 'd');
+          {/* Weekday Headers */}
+          <div className="grid grid-cols-7 mb-2">
+            {WEEKDAYS.map((day, idx) => (
+              <div key={idx} className="text-center text-sm font-medium text-primary-foreground/70">
+                {day}
+              </div>
+            ))}
+          </div>
+
+          {/* Calendar Grid */}
+          <div className="grid grid-cols-7 gap-1">
+            {calendarDays.map((day, idx) => {
+              if (!day) {
+                return <div key={idx} className="aspect-square" />;
+              }
+              const indicators = hasBookingsOnDay(day);
+              const isCurrentMonth = day.getMonth() === currentDate.getMonth();
+              
               return (
                 <button
                   key={idx}
                   onClick={() => setSelectedDay(day)}
                   className={cn(
-                    "flex flex-col items-center gap-1 py-2 px-3 rounded-full transition-all",
-                    isSelected(day) && "bg-foreground text-background",
-                    isToday(day) && !isSelected(day) && "text-rose-500 font-bold"
+                    "aspect-square flex flex-col items-center justify-center rounded-full transition-all relative",
+                    isSelected(day) && "bg-sky-400 text-white",
+                    !isSelected(day) && isToday(day) && "ring-2 ring-sky-400",
+                    !isCurrentMonth && "text-primary-foreground/40"
                   )}
                 >
-                  <span className="text-xs font-medium">{dayOfWeek}</span>
-                  <span className={cn(
-                    "text-lg font-semibold",
-                    isToday(day) && !isSelected(day) && "text-rose-500"
-                  )}>
-                    {dayNum}
-                  </span>
+                  <span className="text-sm font-medium">{format(day, 'd')}</span>
+                  {/* Booking indicators */}
+                  {(indicators.pending || indicators.completed || indicators.cancelled) && !isSelected(day) && (
+                    <div className="flex gap-0.5 mt-0.5 absolute bottom-1">
+                      {indicators.pending && <div className="w-1 h-1 rounded-full bg-amber-400" />}
+                      {indicators.completed && <div className="w-1 h-1 rounded-full bg-emerald-400" />}
+                      {indicators.cancelled && <div className="w-1 h-1 rounded-full bg-rose-400" />}
+                    </div>
+                  )}
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Mobile Calendar Grid - 2 Day View */}
-        <div className="flex-1 overflow-hidden flex flex-col">
-          {/* Day Headers */}
-          <div className="grid grid-cols-[50px_1fr_1fr] border-b bg-muted/30">
-            <div className="p-2 text-xs text-muted-foreground"></div>
-            {mobileDays.map((day, idx) => (
-              <div key={idx} className="p-3 text-center border-l">
-                <div className="text-sm font-medium">
-                  {format(day, 'EEE')} – {format(day, 'd MMM')}
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Selected Day Header */}
+        <div className="px-4 py-3 border-b">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide font-body">
+            {format(selectedDay, 'EEE, MMM d')}
+          </h2>
+        </div>
 
-          {/* Time Grid */}
-          <div className="flex-1 overflow-y-auto">
-            {HOURS.map(hour => {
-              const bookingsDay1 = getBookingsForDayAndHour(mobileDays[0], hour);
-              const bookingsDay2 = getBookingsForDayAndHour(mobileDays[1], hour);
-              const hasBookings = bookingsDay1.length > 0 || bookingsDay2.length > 0;
-
-              return (
-                <div key={hour} className="grid grid-cols-[50px_1fr_1fr] min-h-[80px]">
-                  <div className="p-2 text-xs text-muted-foreground font-medium border-b flex items-start justify-end pr-2 pt-1">
-                    {format(new Date().setHours(hour, 0), 'HH:mm')}
-                  </div>
-                  {mobileDays.map((day, dayIdx) => {
-                    const bookings = dayIdx === 0 ? bookingsDay1 : bookingsDay2;
-                    return (
-                      <div
-                        key={dayIdx}
-                        className={cn(
-                          "border-l border-b p-1 relative",
-                          isToday(day) && "bg-muted/30"
-                        )}
-                      >
-                        {bookings.map(booking => {
-                          const config = statusConfig[booking.status];
-                          return (
-                            <div
-                              key={booking.id}
-                              onClick={() => setSelectedBooking(booking)}
-                              className={cn(
-                                "rounded-lg p-2 cursor-pointer border-l-4 transition-all h-full min-h-[70px]",
-                                config.bgClass,
-                                config.borderClass
-                              )}
-                            >
-                              <div className={cn("font-semibold text-sm mb-1", config.textClass)}>
-                                {booking.serviceName}
-                              </div>
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Clock className="h-3 w-3" />
-                                {booking.bookingTime} - {formatEndTime(booking.bookingTime, booking.duration)}
-                              </div>
-                            </div>
-                          );
-                        })}
+        {/* Appointments List */}
+        <div className="flex-1 overflow-y-auto">
+          {selectedDayBookings.length === 0 ? (
+            <div className="p-6 text-center text-muted-foreground">
+              No appointments scheduled for this day
+            </div>
+          ) : (
+            <div className="divide-y">
+              {selectedDayBookings.map(booking => {
+                const config = statusConfig[booking.status];
+                return (
+                  <div
+                    key={booking.id}
+                    onClick={() => setSelectedBooking(booking)}
+                    className={cn(
+                      "flex items-stretch cursor-pointer hover:bg-muted/50 transition-colors"
+                    )}
+                  >
+                    {/* Left color bar */}
+                    <div className={cn("w-1", config.borderClass.replace('border-l-', 'bg-'))} />
+                    
+                    {/* Time column */}
+                    <div className="py-3 px-3 min-w-[80px]">
+                      <div className="text-sm font-medium">{booking.bookingTime}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {formatEndTime(booking.bookingTime, booking.duration)}
                       </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </div>
+                      <div className={cn("text-xs mt-1", config.textClass)}>
+                        {config.label}
+                      </div>
+                    </div>
+
+                    {/* Booking details */}
+                    <div className="flex-1 py-3 pr-4">
+                      <div className="font-semibold font-body">{booking.customerName}</div>
+                      <div className="text-sm text-muted-foreground">{booking.serviceName}</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {booking.duration} • ${booking.price}
+                      </div>
+                    </div>
+
+                    {/* Arrow */}
+                    <div className="flex items-center pr-3">
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Mobile Bottom Bar */}
