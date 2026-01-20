@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { mockBookings, Booking, BookingStatus } from '@/data/mockBookings';
 import BookingDetailsDialog from './BookingDetailsDialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 8); // 8 AM to 7 PM
 
@@ -18,9 +19,9 @@ const statusConfig: Record<BookingStatus, { label: string; bgClass: string; text
   },
   pending: {
     label: 'Scheduled',
-    bgClass: 'bg-sky-50',
-    textClass: 'text-sky-700',
-    borderClass: 'border-l-sky-500',
+    bgClass: 'bg-fuchsia-50',
+    textClass: 'text-fuchsia-700',
+    borderClass: 'border-l-fuchsia-500',
     icon: Clock,
   },
   cancelled: {
@@ -36,9 +37,12 @@ const AdminCalendar = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
+  const [selectedDay, setSelectedDay] = useState(new Date());
+  const isMobile = useIsMobile();
 
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
-  const weekDays = Array.from({ length: 5 }, (_, i) => addDays(weekStart, i)); // Mon - Fri
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)); // Full week for mobile
+  const desktopDays = Array.from({ length: 5 }, (_, i) => addDays(weekStart, i)); // Mon - Fri for desktop
 
   const todayBookingsCount = useMemo(() => {
     const today = new Date();
@@ -51,6 +55,13 @@ const AdminCalendar = () => {
       const bookingHour = parseInt(booking.bookingTime.split(':')[0], 10);
       return isSameDay(bookingDate, day) && bookingHour === hour;
     });
+  };
+
+  const getBookingsForDay = (day: Date): Booking[] => {
+    return mockBookings.filter(booking => {
+      const bookingDate = new Date(booking.bookingDate);
+      return isSameDay(bookingDate, day);
+    }).sort((a, b) => a.bookingTime.localeCompare(b.bookingTime));
   };
 
   const parseTimeToMinutes = (time: string): number => {
@@ -80,8 +91,177 @@ const AdminCalendar = () => {
     setCurrentDate(prev => direction === 'prev' ? subWeeks(prev, 1) : addWeeks(prev, 1));
   };
 
-  const isToday = (date: Date) => isSameDay(date, new Date());
+  const goToToday = () => {
+    const today = new Date();
+    setCurrentDate(today);
+    setSelectedDay(today);
+  };
 
+  const isToday = (date: Date) => isSameDay(date, new Date());
+  const isSelected = (date: Date) => isSameDay(date, selectedDay);
+
+  // Get two days for mobile view (selected day + next day)
+  const mobileDays = [selectedDay, addDays(selectedDay, 1)];
+
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        {/* Mobile Header */}
+        <div className="bg-background p-4 border-b">
+          <div className="flex items-center justify-between mb-4">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="rounded-full gap-1"
+              onClick={() => navigateWeek('prev')}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              {format(weekStart, 'MMMM')}
+            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Filter className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Settings className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Week Selector */}
+          <div className="flex justify-between">
+            {weekDays.map((day, idx) => {
+              const dayOfWeek = format(day, 'EEEEE');
+              const dayNum = format(day, 'd');
+              return (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedDay(day)}
+                  className={cn(
+                    "flex flex-col items-center gap-1 py-2 px-3 rounded-full transition-all",
+                    isSelected(day) && "bg-foreground text-background",
+                    isToday(day) && !isSelected(day) && "text-rose-500 font-bold"
+                  )}
+                >
+                  <span className="text-xs font-medium">{dayOfWeek}</span>
+                  <span className={cn(
+                    "text-lg font-semibold",
+                    isToday(day) && !isSelected(day) && "text-rose-500"
+                  )}>
+                    {dayNum}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Mobile Calendar Grid - 2 Day View */}
+        <div className="flex-1 overflow-hidden flex flex-col">
+          {/* Day Headers */}
+          <div className="grid grid-cols-[50px_1fr_1fr] border-b bg-muted/30">
+            <div className="p-2 text-xs text-muted-foreground"></div>
+            {mobileDays.map((day, idx) => (
+              <div key={idx} className="p-3 text-center border-l">
+                <div className="text-sm font-medium">
+                  {format(day, 'EEE')} – {format(day, 'd MMM')}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Time Grid */}
+          <div className="flex-1 overflow-y-auto">
+            {HOURS.map(hour => {
+              const bookingsDay1 = getBookingsForDayAndHour(mobileDays[0], hour);
+              const bookingsDay2 = getBookingsForDayAndHour(mobileDays[1], hour);
+              const hasBookings = bookingsDay1.length > 0 || bookingsDay2.length > 0;
+
+              return (
+                <div key={hour} className="grid grid-cols-[50px_1fr_1fr] min-h-[80px]">
+                  <div className="p-2 text-xs text-muted-foreground font-medium border-b flex items-start justify-end pr-2 pt-1">
+                    {format(new Date().setHours(hour, 0), 'HH:mm')}
+                  </div>
+                  {mobileDays.map((day, dayIdx) => {
+                    const bookings = dayIdx === 0 ? bookingsDay1 : bookingsDay2;
+                    return (
+                      <div
+                        key={dayIdx}
+                        className={cn(
+                          "border-l border-b p-1 relative",
+                          isToday(day) && "bg-muted/30"
+                        )}
+                      >
+                        {bookings.map(booking => {
+                          const config = statusConfig[booking.status];
+                          return (
+                            <div
+                              key={booking.id}
+                              onClick={() => setSelectedBooking(booking)}
+                              className={cn(
+                                "rounded-lg p-2 cursor-pointer border-l-4 transition-all h-full min-h-[70px]",
+                                config.bgClass,
+                                config.borderClass
+                              )}
+                            >
+                              <div className={cn("font-semibold text-sm mb-1", config.textClass)}>
+                                {booking.serviceName}
+                              </div>
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Clock className="h-3 w-3" />
+                                {booking.bookingTime} - {formatEndTime(booking.bookingTime, booking.duration)}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Mobile Bottom Bar */}
+        <div className="bg-background border-t p-3 flex items-center justify-between">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="rounded-full"
+            onClick={goToToday}
+          >
+            Today
+          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant={viewMode === 'calendar' ? 'secondary' : 'ghost'} 
+              size="icon" 
+              className="h-10 w-10"
+              onClick={() => setViewMode('calendar')}
+            >
+              <CalendarIcon className="h-5 w-5" />
+            </Button>
+            <Button 
+              variant={viewMode === 'list' ? 'secondary' : 'ghost'} 
+              size="icon" 
+              className="h-10 w-10"
+              onClick={() => setViewMode('list')}
+            >
+              <List className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+
+        <BookingDetailsDialog
+          booking={selectedBooking}
+          onClose={() => setSelectedBooking(null)}
+        />
+      </div>
+    );
+  }
+
+  // Desktop View (existing)
   return (
     <div className="min-h-screen bg-muted/30">
       <div className="max-w-[1400px] mx-auto p-6">
@@ -146,7 +326,7 @@ const AdminCalendar = () => {
             <div className="p-4 text-sm text-muted-foreground font-medium">
               GMT+0
             </div>
-            {weekDays.map((day, idx) => (
+            {desktopDays.map((day, idx) => (
               <div
                 key={idx}
                 className={cn(
@@ -171,7 +351,7 @@ const AdminCalendar = () => {
                 <div className="p-4 text-sm text-muted-foreground font-medium border-b flex items-start justify-end pr-4">
                   {format(new Date().setHours(hour, 0), 'HH:mm')}
                 </div>
-                {weekDays.map((day, dayIdx) => {
+                {desktopDays.map((day, dayIdx) => {
                   const bookings = getBookingsForDayAndHour(day, hour);
                   return (
                     <div
