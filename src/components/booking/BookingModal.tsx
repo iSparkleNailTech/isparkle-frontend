@@ -44,6 +44,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
     customerPhone: null,
   });
   const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<{ name: string; email: string; phone?: string } | null>(null);
 
   const { data: servicesData } = useQuery({
     queryKey: ["services"],
@@ -51,9 +52,20 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
     enabled: isOpen,
   });
 
+  // Fetch user profile when authenticated
+  const { data: userData } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: () => api.getCurrentUser(),
+    enabled: !!user && isOpen,
+    retry: false,
+  });
+
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_, session) => {
       setUser(session?.user ?? null);
+      if (!session?.user) {
+        setUserProfile(null);
+      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -62,6 +74,17 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Update user profile when user data is fetched
+  useEffect(() => {
+    if (userData?.user) {
+      setUserProfile({
+        name: userData.user.name,
+        email: userData.user.email,
+        phone: userData.user.phone,
+      });
+    }
+  }, [userData]);
 
   const handleSelectCategory = (category: ServiceCategoryResponse) => {
     setBooking((prev) => ({
@@ -83,58 +106,92 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
 
   const handleSelectDateTime = (date: Date, timeSlot: string) => {
     setBooking((prev) => ({ ...prev, date, timeSlot }));
-    setStep("auth");
+
+    // If user is authenticated and has profile, skip auth step and confirm immediately.
+    // Pass overrides: setState is async so booking would still be stale inside handleConfirmBooking.
+    if (user && userProfile) {
+      handleConfirmBooking({
+        date,
+        timeSlot,
+        customerName: userProfile.name,
+        customerEmail: userProfile.email,
+        customerPhone: userProfile.phone || "",
+      });
+    } else {
+      setStep("auth");
+    }
   };
 
-  const handleAuthSuccess = (
+  const handleAuthSuccess = async (
     name: string,
     email: string,
     phone: string
   ) => {
-    setBooking((prev) => ({
-      ...prev,
+    // If user just authenticated, fetch their profile to ensure backend has it
+    if (user) {
+      try {
+        await api.getCurrentUser();
+      } catch (error) {
+        // User profile will be created automatically by backend on first request
+      }
+    }
+
+    // Pass overrides: setState is async so booking would still be stale inside handleConfirmBooking
+    handleConfirmBooking({
       customerName: name,
       customerEmail: email,
       customerPhone: phone,
-    }));
-    handleConfirmBooking();
+    });
   };
 
-  const handleConfirmBooking = async () => {
+  const handleConfirmBooking = async (overrides?: Partial<BookingState>) => {
+    const b = { ...booking, ...overrides };
+
     if (
-      !booking.serviceCategoryId ||
-      !booking.packageId ||
-      !booking.date ||
-      !booking.timeSlot ||
-      !booking.customerName ||
-      !booking.customerEmail ||
-      !booking.customerPhone
+      !b.serviceCategoryId ||
+      !b.packageId ||
+      !b.date ||
+      !b.timeSlot
     ) {
       toast.error("Missing booking information");
       return;
     }
 
+    // For authenticated users, customer fields are optional
+    // For guest bookings, customer fields are required
+    if (!user && (!b.customerName || !b.customerEmail || !b.customerPhone)) {
+      toast.error("Please provide your contact information");
+      return;
+    }
+
     try {
       // Combine date and time slot into ISO datetime
-      const [hours, minutes] = booking.timeSlot.split(":").map(Number);
-      const startTime = new Date(booking.date);
+      const [hours, minutes] = b.timeSlot.split(":").map(Number);
+      const startTime = new Date(b.date);
       startTime.setHours(hours, minutes, 0, 0);
 
       // Generate idempotency key
       const idempotencyKey = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
-      await api.createBooking({
-        serviceCategoryId: booking.serviceCategoryId,
-        packageId: booking.packageId,
-        customerName: booking.customerName,
-        customerEmail: booking.customerEmail,
-        customerPhone: booking.customerPhone,
+      // Build booking request
+      const bookingRequest: any = {
+        serviceCategoryId: b.serviceCategoryId,
+        packageId: b.packageId,
         startTime: startTime.toISOString(),
         idempotencyKey,
-      });
+      };
+
+      // Add customer fields only for guest bookings
+      if (!user) {
+        bookingRequest.customerName = b.customerName;
+        bookingRequest.customerEmail = b.customerEmail;
+        bookingRequest.customerPhone = b.customerPhone;
+      }
+
+      await api.createBooking(bookingRequest);
 
       toast.success("Booking Confirmed!", {
-        description: `Your ${booking.packageName} appointment is scheduled for ${booking.date?.toLocaleDateString()} at ${booking.timeSlot}.`,
+        description: `Your ${b.packageName} appointment is scheduled for ${b.date?.toLocaleDateString()} at ${b.timeSlot}.`,
       });
       handleClose();
     } catch (error: any) {

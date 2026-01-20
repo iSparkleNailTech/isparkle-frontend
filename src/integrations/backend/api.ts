@@ -4,7 +4,10 @@ import type {
   AvailabilityResponse,
   CreateBookingRequest,
   CreateBookingResponse,
+  BookingResponse,
 } from "@/types/booking";
+import type { UserResponse, UpdateUserRequest } from "@/types/user";
+import { supabase } from "@/integrations/supabase/client";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
 
@@ -36,6 +39,27 @@ async function handleResponse<T>(response: Response): Promise<T> {
   }
 
   return response.json();
+}
+
+/**
+ * Gets authorization headers with Supabase token if available
+ */
+async function getAuthHeaders(): Promise<HeadersInit> {
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.access_token) {
+      headers["Authorization"] = `Bearer ${session.access_token}`;
+    }
+  } catch (error) {
+    // If getting session fails, continue without auth header
+    console.warn("Failed to get auth session:", error);
+  }
+
+  return headers;
 }
 
 export const api = {
@@ -80,14 +104,50 @@ export const api = {
   createBooking: async (
     data: CreateBookingRequest
   ): Promise<CreateBookingResponse> => {
+    const headers = await getAuthHeaders();
     const response = await fetch(`${API_BASE_URL}/bookings`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify(data),
     });
     return handleResponse<CreateBookingResponse>(response);
+  },
+
+  /**
+   * Get current user profile
+   */
+  getCurrentUser: async (): Promise<{ user: UserResponse }> => {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/users/me`, {
+      headers,
+    });
+    return handleResponse<{ user: UserResponse }>(response);
+  },
+
+  /**
+   * Update current user profile
+   */
+  updateCurrentUser: async (
+    data: UpdateUserRequest
+  ): Promise<{ user: UserResponse }> => {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/users/me`, {
+      method: "PATCH",
+      headers,
+      body: JSON.stringify(data),
+    });
+    return handleResponse<{ user: UserResponse }>(response);
+  },
+
+  /**
+   * Get current user's bookings
+   */
+  getMyBookings: async (): Promise<{ bookings: BookingResponse[] }> => {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/bookings/me`, {
+      headers,
+    });
+    return handleResponse<{ bookings: BookingResponse[] }>(response);
   },
 };
 

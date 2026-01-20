@@ -83,6 +83,13 @@ const AuthStep = ({ onSuccess }: AuthStepProps) => {
       return;
     }
 
+    // Update user metadata with phone if provided
+    if (phone && data.user) {
+      await supabase.auth.updateUser({
+        data: { phone },
+      });
+    }
+
     toast.success("Logged in successfully!");
     onSuccess(userName, userEmail, phone);
   };
@@ -101,7 +108,7 @@ const AuthStep = ({ onSuccess }: AuthStepProps) => {
       email,
       password,
       options: {
-        data: { full_name: name },
+        data: { full_name: name, phone },
         emailRedirectTo: window.location.origin,
       },
     });
@@ -116,20 +123,24 @@ const AuthStep = ({ onSuccess }: AuthStepProps) => {
     onSuccess(name, email, phone);
   };
 
-  const handlePhoneSubmit = (e: React.FormEvent) => {
+  const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!phone) {
       toast.error("Please enter your phone number");
       return;
     }
     // Get user info from session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        const userName = session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "";
-        const userEmail = session.user.email || "";
-        onSuccess(userName, userEmail, phone);
-      }
-    });
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      // Update user metadata with phone
+      await supabase.auth.updateUser({
+        data: { phone },
+      });
+      
+      const userName = session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "";
+      const userEmail = session.user.email || "";
+      onSuccess(userName, userEmail, phone);
+    }
   };
 
   if (mode === "options") {

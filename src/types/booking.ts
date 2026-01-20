@@ -30,9 +30,10 @@ export interface AvailabilityResponse {
 export interface CreateBookingRequest {
   serviceCategoryId: string;
   packageId: string;
-  customerName: string;
-  customerEmail: string;
-  customerPhone: string;
+  userId?: string; // Optional - if provided, customer fields are optional
+  customerName?: string; // Required if userId not provided
+  customerEmail?: string; // Required if userId not provided
+  customerPhone?: string; // Required if userId not provided
   startTime: string; // ISO date string
   idempotencyKey?: string;
 }
@@ -41,9 +42,10 @@ export interface BookingResponse {
   _id: string;
   serviceCategoryId: string;
   packageId: string;
-  customerName: string;
-  customerEmail: string;
-  customerPhone: string;
+  userId?: string;
+  customerName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
   startTime: string;
   endTime: string;
   status: string;
