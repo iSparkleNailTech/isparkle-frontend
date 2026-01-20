@@ -135,8 +135,8 @@ const AdminCalendar = () => {
     return (
       <div className="h-screen bg-background flex flex-col overflow-hidden">
         {/* Mobile Header */}
-        <div className="bg-background p-4 border-b flex-shrink-0">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-background px-3 py-2 border-b flex-shrink-0">
+          <div className="flex items-center justify-between mb-2">
             <Popover open={monthPickerOpen} onOpenChange={setMonthPickerOpen}>
               <PopoverTrigger asChild>
                 <Button 
@@ -191,8 +191,8 @@ const AdminCalendar = () => {
             </div>
           </div>
 
-          {/* All Weeks in Month Selector - Scrollable */}
-          <div className="space-y-2 max-h-32 overflow-y-auto">
+          {/* All Weeks in Month Selector - No Scroll */}
+          <div className="space-y-1">
             {weeksInMonth.map((weekStart, weekIdx) => {
               const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
               return (
@@ -206,15 +206,15 @@ const AdminCalendar = () => {
                         key={idx}
                         onClick={() => setSelectedDay(day)}
                         className={cn(
-                          "flex flex-col items-center gap-0.5 py-1 px-2 rounded-full transition-all min-w-[36px]",
+                          "flex flex-col items-center py-0.5 px-1.5 rounded-full transition-all min-w-[32px]",
                           isSelected(day) && "bg-foreground text-background",
                           isToday(day) && !isSelected(day) && "text-rose-500 font-bold",
                           !inMonth && "opacity-40"
                         )}
                       >
-                        <span className="text-[10px] font-medium">{dayOfWeek}</span>
+                        <span className="text-[9px] font-medium leading-tight">{dayOfWeek}</span>
                         <span className={cn(
-                          "text-sm font-semibold",
+                          "text-xs font-semibold leading-tight",
                           isToday(day) && !isSelected(day) && "text-rose-500"
                         )}>
                           {dayNum}
@@ -249,7 +249,7 @@ const AdminCalendar = () => {
               const bookingsDay2 = getBookingsForDayAndHour(mobileDays[1], hour);
 
               return (
-                <div key={hour} className="grid grid-cols-[50px_1fr_1fr] min-h-[80px]">
+                <div key={hour} className="grid grid-cols-[50px_1fr_1fr] min-h-[60px]">
                   <div className="p-2 text-xs text-muted-foreground font-medium border-b flex items-start justify-end pr-2 pt-1">
                     {format(new Date().setHours(hour, 0), 'HH:mm')}
                   </div>
@@ -270,7 +270,7 @@ const AdminCalendar = () => {
                               key={booking.id}
                               onClick={() => setSelectedBooking(booking)}
                               className={cn(
-                                "rounded-lg p-2 cursor-pointer border-l-4 transition-all h-full min-h-[70px]",
+                                "rounded-lg p-1.5 cursor-pointer border-l-4 transition-all h-full min-h-[50px]",
                                 config.bgClass,
                                 config.borderClass
                               )}
