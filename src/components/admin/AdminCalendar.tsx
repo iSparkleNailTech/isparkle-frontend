@@ -133,9 +133,9 @@ const AdminCalendar = () => {
 
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="h-screen bg-background flex flex-col overflow-hidden">
         {/* Mobile Header */}
-        <div className="bg-background p-4 border-b">
+        <div className="bg-background p-4 border-b flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
             <Popover open={monthPickerOpen} onOpenChange={setMonthPickerOpen}>
               <PopoverTrigger asChild>
@@ -174,6 +174,14 @@ const AdminCalendar = () => {
               </PopoverContent>
             </Popover>
             <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="rounded-full"
+                onClick={goToToday}
+              >
+                Today
+              </Button>
               <Button variant="ghost" size="icon" className="h-8 w-8">
                 <Filter className="h-4 w-4" />
               </Button>
@@ -183,8 +191,8 @@ const AdminCalendar = () => {
             </div>
           </div>
 
-          {/* All Weeks in Month Selector */}
-          <div className="space-y-2 max-h-40 overflow-y-auto">
+          {/* All Weeks in Month Selector - Scrollable */}
+          <div className="space-y-2 max-h-32 overflow-y-auto">
             {weeksInMonth.map((weekStart, weekIdx) => {
               const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
               return (
@@ -221,9 +229,9 @@ const AdminCalendar = () => {
         </div>
 
         {/* Mobile Calendar Grid - 2 Day View */}
-        <div className="flex-1 overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
           {/* Day Headers */}
-          <div className="grid grid-cols-[50px_1fr_1fr] border-b bg-muted/30">
+          <div className="grid grid-cols-[50px_1fr_1fr] border-b bg-muted/30 flex-shrink-0">
             <div className="p-2 text-xs text-muted-foreground"></div>
             {mobileDays.map((day, idx) => (
               <div key={idx} className="p-3 text-center border-l">
@@ -234,12 +242,11 @@ const AdminCalendar = () => {
             ))}
           </div>
 
-          {/* Time Grid */}
-          <div className="flex-1 overflow-y-auto">
+          {/* Time Grid - Scrollable */}
+          <div className="flex-1 overflow-y-auto min-h-0">
             {HOURS.map(hour => {
               const bookingsDay1 = getBookingsForDayAndHour(mobileDays[0], hour);
               const bookingsDay2 = getBookingsForDayAndHour(mobileDays[1], hour);
-              const hasBookings = bookingsDay1.length > 0 || bookingsDay2.length > 0;
 
               return (
                 <div key={hour} className="grid grid-cols-[50px_1fr_1fr] min-h-[80px]">
@@ -284,36 +291,6 @@ const AdminCalendar = () => {
                 </div>
               );
             })}
-          </div>
-        </div>
-
-        {/* Mobile Bottom Bar */}
-        <div className="bg-background border-t p-3 flex items-center justify-between">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="rounded-full"
-            onClick={goToToday}
-          >
-            Today
-          </Button>
-          <div className="flex items-center gap-2">
-            <Button 
-              variant={viewMode === 'calendar' ? 'secondary' : 'ghost'} 
-              size="icon" 
-              className="h-10 w-10"
-              onClick={() => setViewMode('calendar')}
-            >
-              <CalendarIcon className="h-5 w-5" />
-            </Button>
-            <Button 
-              variant={viewMode === 'list' ? 'secondary' : 'ghost'} 
-              size="icon" 
-              className="h-10 w-10"
-              onClick={() => setViewMode('list')}
-            >
-              <List className="h-5 w-5" />
-            </Button>
           </div>
         </div>
 
