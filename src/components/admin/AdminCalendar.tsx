@@ -1,13 +1,23 @@
 import { useState, useMemo } from 'react';
-import { format, startOfWeek, addDays, isSameDay, addWeeks, subWeeks } from 'date-fns';
+import { format, startOfWeek, startOfMonth, endOfMonth, addDays, isSameDay, isSameMonth, addMonths, subMonths, eachWeekOfInterval, setMonth, setYear, getMonth, getYear } from 'date-fns';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Filter, Settings, Check, X, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { mockBookings, Booking, BookingStatus } from '@/data/mockBookings';
 import BookingDetailsDialog from './BookingDetailsDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 8); // 8 AM to 7 PM
+
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
 
 const statusConfig: Record<BookingStatus, { label: string; bgClass: string; textClass: string; borderClass: string; icon: typeof Check }> = {
   completed: {
@@ -38,11 +48,19 @@ const AdminCalendar = () => {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
   const [selectedDay, setSelectedDay] = useState(new Date());
+  const [monthPickerOpen, setMonthPickerOpen] = useState(false);
   const isMobile = useIsMobile();
 
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)); // Full week for mobile
   const desktopDays = Array.from({ length: 5 }, (_, i) => addDays(weekStart, i)); // Mon - Fri for desktop
+
+  // Get all weeks in the current month for mobile
+  const weeksInMonth = useMemo(() => {
+    const monthStart = startOfMonth(currentDate);
+    const monthEnd = endOfMonth(currentDate);
+    return eachWeekOfInterval({ start: monthStart, end: monthEnd }, { weekStartsOn: 1 });
+  }, [currentDate]);
 
   const todayBookingsCount = useMemo(() => {
     const today = new Date();
@@ -87,8 +105,17 @@ const AdminCalendar = () => {
     return `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
   };
 
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    setCurrentDate(prev => direction === 'prev' ? subMonths(prev, 1) : addMonths(prev, 1));
+  };
+
   const navigateWeek = (direction: 'prev' | 'next') => {
-    setCurrentDate(prev => direction === 'prev' ? subWeeks(prev, 1) : addWeeks(prev, 1));
+    setCurrentDate(prev => direction === 'prev' ? addDays(prev, -7) : addDays(prev, 7));
+  };
+
+  const selectMonth = (monthIndex: number) => {
+    setCurrentDate(prev => setMonth(prev, monthIndex));
+    setMonthPickerOpen(false);
   };
 
   const goToToday = () => {
@@ -99,6 +126,7 @@ const AdminCalendar = () => {
 
   const isToday = (date: Date) => isSameDay(date, new Date());
   const isSelected = (date: Date) => isSameDay(date, selectedDay);
+  const isCurrentMonth = (date: Date) => isSameMonth(date, currentDate);
 
   // Get two days for mobile view (selected day + next day)
   const mobileDays = [selectedDay, addDays(selectedDay, 1)];
@@ -109,15 +137,42 @@ const AdminCalendar = () => {
         {/* Mobile Header */}
         <div className="bg-background p-4 border-b">
           <div className="flex items-center justify-between mb-4">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="rounded-full gap-1"
-              onClick={() => navigateWeek('prev')}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              {format(weekStart, 'MMMM')}
-            </Button>
+            <Popover open={monthPickerOpen} onOpenChange={setMonthPickerOpen}>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="rounded-full gap-1"
+                >
+                  {format(currentDate, 'MMMM yyyy')}
+                  <ChevronRight className={cn("h-4 w-4 transition-transform", monthPickerOpen && "rotate-90")} />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-3" align="start">
+                <div className="flex items-center justify-between mb-3">
+                  <Button variant="ghost" size="icon" onClick={() => setCurrentDate(prev => setYear(prev, getYear(prev) - 1))}>
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="font-semibold">{getYear(currentDate)}</span>
+                  <Button variant="ghost" size="icon" onClick={() => setCurrentDate(prev => setYear(prev, getYear(prev) + 1))}>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {MONTHS.map((month, idx) => (
+                    <Button
+                      key={month}
+                      variant={getMonth(currentDate) === idx ? "default" : "ghost"}
+                      size="sm"
+                      className="text-xs"
+                      onClick={() => selectMonth(idx)}
+                    >
+                      {month.slice(0, 3)}
+                    </Button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="icon" className="h-8 w-8">
                 <Filter className="h-4 w-4" />
@@ -128,29 +183,38 @@ const AdminCalendar = () => {
             </div>
           </div>
 
-          {/* Week Selector */}
-          <div className="flex justify-between">
-            {weekDays.map((day, idx) => {
-              const dayOfWeek = format(day, 'EEEEE');
-              const dayNum = format(day, 'd');
+          {/* All Weeks in Month Selector */}
+          <div className="space-y-2 max-h-40 overflow-y-auto">
+            {weeksInMonth.map((weekStart, weekIdx) => {
+              const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
               return (
-                <button
-                  key={idx}
-                  onClick={() => setSelectedDay(day)}
-                  className={cn(
-                    "flex flex-col items-center gap-1 py-2 px-3 rounded-full transition-all",
-                    isSelected(day) && "bg-foreground text-background",
-                    isToday(day) && !isSelected(day) && "text-rose-500 font-bold"
-                  )}
-                >
-                  <span className="text-xs font-medium">{dayOfWeek}</span>
-                  <span className={cn(
-                    "text-lg font-semibold",
-                    isToday(day) && !isSelected(day) && "text-rose-500"
-                  )}>
-                    {dayNum}
-                  </span>
-                </button>
+                <div key={weekIdx} className="flex justify-between">
+                  {days.map((day, idx) => {
+                    const dayOfWeek = format(day, 'EEEEE');
+                    const dayNum = format(day, 'd');
+                    const inMonth = isCurrentMonth(day);
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => setSelectedDay(day)}
+                        className={cn(
+                          "flex flex-col items-center gap-0.5 py-1 px-2 rounded-full transition-all min-w-[36px]",
+                          isSelected(day) && "bg-foreground text-background",
+                          isToday(day) && !isSelected(day) && "text-rose-500 font-bold",
+                          !inMonth && "opacity-40"
+                        )}
+                      >
+                        <span className="text-[10px] font-medium">{dayOfWeek}</span>
+                        <span className={cn(
+                          "text-sm font-semibold",
+                          isToday(day) && !isSelected(day) && "text-rose-500"
+                        )}>
+                          {dayNum}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               );
             })}
           </div>
