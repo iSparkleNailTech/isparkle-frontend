@@ -206,15 +206,15 @@ const AdminCalendar = () => {
                         key={idx}
                         onClick={() => setSelectedDay(day)}
                         className={cn(
-                          "flex flex-col items-center gap-0 py-0.5 px-1.5 rounded-full transition-all min-w-[32px]",
+                          "flex flex-col items-center gap-0.5 py-1 px-2 rounded-full transition-all min-w-[36px]",
                           isSelected(day) && "bg-foreground text-background",
                           isToday(day) && !isSelected(day) && "text-rose-500 font-bold",
                           !inMonth && "opacity-40"
                         )}
                       >
-                        <span className="text-[9px] font-medium leading-tight">{dayOfWeek}</span>
+                        <span className="text-[10px] font-medium">{dayOfWeek}</span>
                         <span className={cn(
-                          "text-xs font-semibold leading-tight",
+                          "text-sm font-semibold",
                           isToday(day) && !isSelected(day) && "text-rose-500"
                         )}>
                           {dayNum}
