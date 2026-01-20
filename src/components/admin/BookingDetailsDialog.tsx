@@ -49,10 +49,10 @@ const BookingDetailsDialog = ({ booking, onClose }: BookingDetailsDialogProps) =
 
   return (
     <Dialog open={!!booking} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[480px]">
+      <DialogContent className="sm:max-w-[480px] font-body">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl">Booking Details</DialogTitle>
+            <DialogTitle className="text-xl font-body">Booking Details</DialogTitle>
             <Badge className={cn("font-medium", config.className)}>
               {config.label}
             </Badge>
@@ -121,7 +121,7 @@ const BookingDetailsDialog = ({ booking, onClose }: BookingDetailsDialogProps) =
           {/* Actions */}
           {booking.status === 'pending' && (
             <div className="flex gap-3 pt-2">
-              <Button className="flex-1 gap-2" variant="default">
+              <Button className="flex-1 gap-2 bg-emerald-600 hover:bg-emerald-700 text-white">
                 <Check className="h-4 w-4" />
                 Mark Complete
               </Button>
