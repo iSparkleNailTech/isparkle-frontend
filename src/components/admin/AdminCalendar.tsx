@@ -139,10 +139,7 @@ const AdminCalendar = () => {
     return (
       <div className="h-dvh bg-background flex flex-col overflow-hidden">
         {/* Mobile Header */}
-        <div className="flex items-center justify-between px-4 py-3 flex-shrink-0">
-          <Button variant="ghost" size="icon" className="h-10 w-10">
-            <Menu className="h-6 w-6" />
-          </Button>
+        <div className="flex items-center justify-center px-4 py-3 flex-shrink-0">
           <Popover open={monthPickerOpen} onOpenChange={setMonthPickerOpen}>
             <PopoverTrigger asChild>
               <Button 
@@ -178,13 +175,6 @@ const AdminCalendar = () => {
               </div>
             </PopoverContent>
           </Popover>
-          <div className="h-10 w-10 rounded-full bg-muted overflow-hidden">
-            <img 
-              src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face" 
-              alt="Profile" 
-              className="h-full w-full object-cover"
-            />
-          </div>
         </div>
 
         {/* Calendar Section - 50% height */}
@@ -266,35 +256,6 @@ const AdminCalendar = () => {
           })}
         </div>
 
-        {/* Floating Action Button */}
-        <Button 
-          size="icon" 
-          className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg z-10"
-        >
-          <Plus className="h-6 w-6" />
-        </Button>
-
-        {/* Bottom Navigation */}
-        <div className="flex-shrink-0 border-t bg-background px-6 py-2 pb-safe">
-          <div className="flex justify-between items-center">
-            <button className="flex flex-col items-center gap-1 py-2 px-4 text-foreground">
-              <CalendarIcon className="h-5 w-5" />
-              <span className="text-xs font-medium">Calendar</span>
-            </button>
-            <button className="flex flex-col items-center gap-1 py-2 px-4 text-muted-foreground">
-              <Timer className="h-5 w-5" />
-              <span className="text-xs">Time</span>
-            </button>
-            <button className="flex flex-col items-center gap-1 py-2 px-4 text-muted-foreground">
-              <Users className="h-5 w-5" />
-              <span className="text-xs">Team</span>
-            </button>
-            <button className="flex flex-col items-center gap-1 py-2 px-4 text-muted-foreground">
-              <Settings className="h-5 w-5" />
-              <span className="text-xs">Settings</span>
-            </button>
-          </div>
-        </div>
 
         <BookingDetailsDialog
           booking={selectedBooking}
