@@ -367,33 +367,21 @@ const AdminCalendar = () => {
                     >
                       {bookings.map(booking => {
                         const config = statusConfig[booking.status];
-                        const StatusIcon = config.icon;
                         return (
                           <div
                             key={booking.id}
                             onClick={() => setSelectedBooking(booking)}
                             className={cn(
-                              "rounded-lg p-3 mb-1 cursor-pointer border-l-4 transition-all hover:shadow-md",
-                              config.bgClass,
-                              config.borderClass
+                              "rounded-lg p-3 mb-1 cursor-pointer transition-all hover:shadow-md",
+                              config.bgClass
                             )}
                           >
-                            <div className="text-xs text-muted-foreground mb-1">
+                            <div className={cn("font-medium text-sm mb-1", config.textClass)}>
+                              {booking.serviceName} - {booking.customerName}
+                            </div>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Clock className="h-3 w-3" />
                               {booking.bookingTime} - {formatEndTime(booking.bookingTime, booking.duration)}
-                            </div>
-                            <div className="font-medium text-sm text-foreground mb-0.5">
-                              {booking.customerName}
-                            </div>
-                            <div className="text-xs text-muted-foreground mb-2">
-                              {booking.serviceName}
-                            </div>
-                            <div className={cn(
-                              "inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium",
-                              config.bgClass,
-                              config.textClass
-                            )}>
-                              <StatusIcon className="h-3 w-3" />
-                              {config.label}
                             </div>
                           </div>
                         );
