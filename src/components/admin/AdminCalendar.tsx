@@ -134,8 +134,8 @@ const AdminCalendar = () => {
   if (isMobile) {
     return (
       <div className="h-dvh bg-background flex flex-col overflow-hidden">
-        {/* Mobile Header - 1/3 of screen */}
-        <div className="bg-background border-b flex-shrink-0 h-1/3 flex flex-col">
+        {/* Mobile Header - 50% of screen */}
+        <div className="bg-background border-b flex-shrink-0 h-1/2 flex flex-col">
           <div className="flex items-center justify-between p-3">
             <Popover open={monthPickerOpen} onOpenChange={setMonthPickerOpen}>
               <PopoverTrigger asChild>
