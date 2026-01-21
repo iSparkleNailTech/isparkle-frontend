@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { format, startOfWeek, startOfMonth, endOfMonth, addDays, isSameDay, isSameMonth, addMonths, subMonths, eachWeekOfInterval, setMonth, setYear, getMonth, getYear } from 'date-fns';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Filter, Settings, Check, X, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Filter, Settings, Check, X, Clock, Menu, Plus, Timer, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { mockBookings, Booking, BookingStatus } from '@/data/mockBookings';
@@ -19,6 +19,8 @@ const MONTHS = [
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
+const DAY_HEADERS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+
 const statusConfig: Record<BookingStatus, { label: string; bgClass: string; textClass: string; borderClass: string; icon: typeof Check }> = {
   completed: {
     label: 'Completed',
@@ -29,16 +31,16 @@ const statusConfig: Record<BookingStatus, { label: string; bgClass: string; text
   },
   pending: {
     label: 'Scheduled',
-    bgClass: 'bg-fuchsia-50',
-    textClass: 'text-fuchsia-700',
-    borderClass: 'border-l-fuchsia-500',
+    bgClass: 'bg-sky-100',
+    textClass: 'text-sky-700',
+    borderClass: 'border-l-sky-400',
     icon: Clock,
   },
   cancelled: {
     label: 'Cancelled',
-    bgClass: 'bg-rose-50',
-    textClass: 'text-rose-700',
-    borderClass: 'border-l-rose-500',
+    bgClass: 'bg-fuchsia-100',
+    textClass: 'text-fuchsia-700',
+    borderClass: 'border-l-fuchsia-400',
     icon: X,
   },
 };
@@ -55,11 +57,13 @@ const AdminCalendar = () => {
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)); // Full week for mobile
   const desktopDays = Array.from({ length: 5 }, (_, i) => addDays(weekStart, i)); // Mon - Fri for desktop
 
-  // Get all weeks in the current month for mobile
+  // Get all weeks in the current month for mobile (including partial weeks)
   const weeksInMonth = useMemo(() => {
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(currentDate);
-    return eachWeekOfInterval({ start: monthStart, end: monthEnd }, { weekStartsOn: 1 });
+    const firstWeekStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+    const lastWeekStart = startOfWeek(monthEnd, { weekStartsOn: 1 });
+    return eachWeekOfInterval({ start: firstWeekStart, end: lastWeekStart }, { weekStartsOn: 1 });
   }, [currentDate]);
 
   const todayBookingsCount = useMemo(() => {
@@ -134,71 +138,73 @@ const AdminCalendar = () => {
   if (isMobile) {
     return (
       <div className="h-dvh bg-background flex flex-col overflow-hidden">
-        {/* Mobile Header - 50% of screen */}
-        <div className="bg-background flex-shrink-0 h-1/2 flex flex-col">
-          <div className="flex items-center justify-between p-3">
-            <Popover open={monthPickerOpen} onOpenChange={setMonthPickerOpen}>
-              <PopoverTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="rounded-full gap-1"
-                >
-                  {format(currentDate, 'MMMM yyyy')}
-                  <ChevronRight className={cn("h-4 w-4 transition-transform", monthPickerOpen && "rotate-90")} />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-64 p-3" align="start">
-                <div className="flex items-center justify-between mb-3">
-                  <Button variant="ghost" size="icon" onClick={() => setCurrentDate(prev => setYear(prev, getYear(prev) - 1))}>
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <span className="font-semibold">{getYear(currentDate)}</span>
-                  <Button variant="ghost" size="icon" onClick={() => setCurrentDate(prev => setYear(prev, getYear(prev) + 1))}>
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  {MONTHS.map((month, idx) => (
-                    <Button
-                      key={month}
-                      variant={getMonth(currentDate) === idx ? "default" : "ghost"}
-                      size="sm"
-                      className="text-xs"
-                      onClick={() => selectMonth(idx)}
-                    >
-                      {month.slice(0, 3)}
-                    </Button>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
-            <div className="flex items-center gap-2">
+        {/* Mobile Header */}
+        <div className="flex items-center justify-between px-4 py-3 flex-shrink-0">
+          <Button variant="ghost" size="icon" className="h-10 w-10">
+            <Menu className="h-6 w-6" />
+          </Button>
+          <Popover open={monthPickerOpen} onOpenChange={setMonthPickerOpen}>
+            <PopoverTrigger asChild>
               <Button 
-                variant="outline" 
-                size="sm" 
-                className="rounded-full text-xs"
-                onClick={goToToday}
+                variant="ghost" 
+                className="text-lg font-semibold gap-1"
               >
-                Today
+                {format(currentDate, 'MMMM yyyy')}
+                <ChevronRight className={cn("h-4 w-4 transition-transform", monthPickerOpen && "rotate-90")} />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Filter className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Settings className="h-4 w-4" />
-              </Button>
-            </div>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 p-3" align="center">
+              <div className="flex items-center justify-between mb-3">
+                <Button variant="ghost" size="icon" onClick={() => setCurrentDate(prev => setYear(prev, getYear(prev) - 1))}>
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="font-semibold">{getYear(currentDate)}</span>
+                <Button variant="ghost" size="icon" onClick={() => setCurrentDate(prev => setYear(prev, getYear(prev) + 1))}>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {MONTHS.map((month, idx) => (
+                  <Button
+                    key={month}
+                    variant={getMonth(currentDate) === idx ? "default" : "ghost"}
+                    size="sm"
+                    className="text-xs"
+                    onClick={() => selectMonth(idx)}
+                  >
+                    {month.slice(0, 3)}
+                  </Button>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+          <div className="h-10 w-10 rounded-full bg-muted overflow-hidden">
+            <img 
+              src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face" 
+              alt="Profile" 
+              className="h-full w-full object-cover"
+            />
+          </div>
+        </div>
+
+        {/* Calendar Section - 50% height */}
+        <div className="h-1/2 flex-shrink-0 flex flex-col px-4">
+          {/* Day Headers */}
+          <div className="grid grid-cols-7 mb-2">
+            {DAY_HEADERS.map((day, idx) => (
+              <div key={idx} className="text-center text-sm text-muted-foreground font-medium py-2">
+                {day}
+              </div>
+            ))}
           </div>
 
-          {/* All Weeks in Month - Fills remaining header space */}
-          <div className="flex-1 overflow-y-auto px-2 pb-2">
+          {/* Calendar Grid */}
+          <div className="flex-1 flex flex-col justify-evenly">
             {weeksInMonth.map((weekStart, weekIdx) => {
               const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
               return (
-                <div key={weekIdx} className="flex justify-between py-1">
+                <div key={weekIdx} className="grid grid-cols-7">
                   {days.map((day, idx) => {
-                    const dayOfWeek = format(day, 'EEEEE');
                     const dayNum = format(day, 'd');
                     const inMonth = isCurrentMonth(day);
                     return (
@@ -206,19 +212,13 @@ const AdminCalendar = () => {
                         key={idx}
                         onClick={() => setSelectedDay(day)}
                         className={cn(
-                          "flex flex-col items-center gap-0.5 py-1 px-2 rounded-full transition-all min-w-[36px]",
+                          "flex items-center justify-center h-10 w-10 mx-auto rounded-full transition-all text-sm",
                           isSelected(day) && "bg-foreground text-background",
-                          isToday(day) && !isSelected(day) && "text-rose-500 font-bold",
-                          !inMonth && "opacity-40"
+                          isToday(day) && !isSelected(day) && "border-2 border-foreground",
+                          !inMonth && "text-muted-foreground/50"
                         )}
                       >
-                        <span className="text-[10px] font-medium">{dayOfWeek}</span>
-                        <span className={cn(
-                          "text-sm font-semibold",
-                          isToday(day) && !isSelected(day) && "text-rose-500"
-                        )}>
-                          {dayNum}
-                        </span>
+                        {dayNum}
                       </button>
                     );
                   })}
@@ -228,60 +228,71 @@ const AdminCalendar = () => {
           </div>
         </div>
 
-        {/* Mobile Calendar Grid - Single Day View */}
-        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-          {/* Day Header */}
-          <div className="grid grid-cols-[50px_1fr] border-b bg-muted/30 flex-shrink-0">
-            <div className="p-2 text-xs text-muted-foreground"></div>
-            <div className="p-3 text-center border-l">
-              <div className="text-sm font-medium">
-                {format(mobileDay, 'EEEE')} – {format(mobileDay, 'd MMMM')}
-              </div>
-            </div>
-          </div>
+        {/* Time Grid Section - 50% height */}
+        <div className="h-1/2 flex-1 overflow-y-auto border-t">
+          {HOURS.map(hour => {
+            const bookings = getBookingsForDayAndHour(mobileDay, hour);
 
-          {/* Time Grid - Scrollable */}
-          <div className="flex-1 overflow-y-auto min-h-0">
-            {HOURS.map(hour => {
-              const bookings = getBookingsForDayAndHour(mobileDay, hour);
-
-              return (
-                <div key={hour} className="grid grid-cols-[50px_1fr] min-h-[80px]">
-                  <div className="p-2 text-xs text-muted-foreground font-medium border-b flex items-start justify-end pr-2 pt-1">
-                    {format(new Date().setHours(hour, 0), 'HH:mm')}
-                  </div>
-                  <div
-                    className={cn(
-                      "border-l border-b p-1 relative",
-                      isToday(mobileDay) && "bg-muted/30"
-                    )}
-                  >
-                    {bookings.map(booking => {
-                      const config = statusConfig[booking.status];
-                      return (
-                        <div
-                          key={booking.id}
-                          onClick={() => setSelectedBooking(booking)}
-                          className={cn(
-                            "rounded-lg p-2 cursor-pointer border-l-4 transition-all h-full min-h-[70px]",
-                            config.bgClass,
-                            config.borderClass
-                          )}
-                        >
-                          <div className={cn("font-semibold text-sm mb-1", config.textClass)}>
-                            {booking.serviceName}
-                          </div>
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Clock className="h-3 w-3" />
-                            {booking.bookingTime} - {formatEndTime(booking.bookingTime, booking.duration)}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+            return (
+              <div key={hour} className="flex min-h-[60px] border-b">
+                <div className="w-14 flex-shrink-0 text-xs text-muted-foreground font-medium flex items-start justify-end pr-3 pt-2">
+                  {format(new Date().setHours(hour, 0), 'HH:mm')}
                 </div>
-              );
-            })}
+                <div className="flex-1 border-l p-1 flex gap-1">
+                  {bookings.map(booking => {
+                    const config = statusConfig[booking.status];
+                    return (
+                      <div
+                        key={booking.id}
+                        onClick={() => setSelectedBooking(booking)}
+                        className={cn(
+                          "rounded-lg p-2 cursor-pointer flex-1 min-w-0",
+                          config.bgClass
+                        )}
+                      >
+                        <div className={cn("font-medium text-sm truncate", config.textClass)}>
+                          {booking.serviceName} - {booking.customerName}
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                          <Clock className="h-3 w-3" />
+                          {booking.bookingTime} - {formatEndTime(booking.bookingTime, booking.duration)}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Floating Action Button */}
+        <Button 
+          size="icon" 
+          className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg z-10"
+        >
+          <Plus className="h-6 w-6" />
+        </Button>
+
+        {/* Bottom Navigation */}
+        <div className="flex-shrink-0 border-t bg-background px-6 py-2 pb-safe">
+          <div className="flex justify-between items-center">
+            <button className="flex flex-col items-center gap-1 py-2 px-4 text-foreground">
+              <CalendarIcon className="h-5 w-5" />
+              <span className="text-xs font-medium">Calendar</span>
+            </button>
+            <button className="flex flex-col items-center gap-1 py-2 px-4 text-muted-foreground">
+              <Timer className="h-5 w-5" />
+              <span className="text-xs">Time</span>
+            </button>
+            <button className="flex flex-col items-center gap-1 py-2 px-4 text-muted-foreground">
+              <Users className="h-5 w-5" />
+              <span className="text-xs">Team</span>
+            </button>
+            <button className="flex flex-col items-center gap-1 py-2 px-4 text-muted-foreground">
+              <Settings className="h-5 w-5" />
+              <span className="text-xs">Settings</span>
+            </button>
           </div>
         </div>
 
