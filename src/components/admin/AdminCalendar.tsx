@@ -128,8 +128,8 @@ const AdminCalendar = () => {
   const isSelected = (date: Date) => isSameDay(date, selectedDay);
   const isCurrentMonth = (date: Date) => isSameMonth(date, currentDate);
 
-  // Get two days for mobile view (selected day + next day)
-  const mobileDays = [selectedDay, addDays(selectedDay, 1)];
+  // Single day for mobile view
+  const mobileDay = selectedDay;
 
   if (isMobile) {
     return (
@@ -228,66 +228,57 @@ const AdminCalendar = () => {
           </div>
         </div>
 
-        {/* Mobile Calendar Grid - 2 Day View */}
+        {/* Mobile Calendar Grid - Single Day View */}
         <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-          {/* Day Headers */}
-          <div className="grid grid-cols-[50px_1fr_1fr] border-b bg-muted/30 flex-shrink-0">
+          {/* Day Header */}
+          <div className="grid grid-cols-[50px_1fr] border-b bg-muted/30 flex-shrink-0">
             <div className="p-2 text-xs text-muted-foreground"></div>
-            {mobileDays.map((day, idx) => (
-              <div key={idx} className="p-3 text-center border-l">
-                <div className="text-sm font-medium">
-                  {format(day, 'EEE')} – {format(day, 'd MMM')}
-                </div>
+            <div className="p-3 text-center border-l">
+              <div className="text-sm font-medium">
+                {format(mobileDay, 'EEEE')} – {format(mobileDay, 'd MMMM')}
               </div>
-            ))}
+            </div>
           </div>
 
           {/* Time Grid - Scrollable */}
           <div className="flex-1 overflow-y-auto min-h-0">
             {HOURS.map(hour => {
-              const bookingsDay1 = getBookingsForDayAndHour(mobileDays[0], hour);
-              const bookingsDay2 = getBookingsForDayAndHour(mobileDays[1], hour);
+              const bookings = getBookingsForDayAndHour(mobileDay, hour);
 
               return (
-                <div key={hour} className="grid grid-cols-[50px_1fr_1fr] min-h-[80px]">
+                <div key={hour} className="grid grid-cols-[50px_1fr] min-h-[80px]">
                   <div className="p-2 text-xs text-muted-foreground font-medium border-b flex items-start justify-end pr-2 pt-1">
                     {format(new Date().setHours(hour, 0), 'HH:mm')}
                   </div>
-                  {mobileDays.map((day, dayIdx) => {
-                    const bookings = dayIdx === 0 ? bookingsDay1 : bookingsDay2;
-                    return (
-                      <div
-                        key={dayIdx}
-                        className={cn(
-                          "border-l border-b p-1 relative",
-                          isToday(day) && "bg-muted/30"
-                        )}
-                      >
-                        {bookings.map(booking => {
-                          const config = statusConfig[booking.status];
-                          return (
-                            <div
-                              key={booking.id}
-                              onClick={() => setSelectedBooking(booking)}
-                              className={cn(
-                                "rounded-lg p-2 cursor-pointer border-l-4 transition-all h-full min-h-[70px]",
-                                config.bgClass,
-                                config.borderClass
-                              )}
-                            >
-                              <div className={cn("font-semibold text-sm mb-1", config.textClass)}>
-                                {booking.serviceName}
-                              </div>
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Clock className="h-3 w-3" />
-                                {booking.bookingTime} - {formatEndTime(booking.bookingTime, booking.duration)}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    );
-                  })}
+                  <div
+                    className={cn(
+                      "border-l border-b p-1 relative",
+                      isToday(mobileDay) && "bg-muted/30"
+                    )}
+                  >
+                    {bookings.map(booking => {
+                      const config = statusConfig[booking.status];
+                      return (
+                        <div
+                          key={booking.id}
+                          onClick={() => setSelectedBooking(booking)}
+                          className={cn(
+                            "rounded-lg p-2 cursor-pointer border-l-4 transition-all h-full min-h-[70px]",
+                            config.bgClass,
+                            config.borderClass
+                          )}
+                        >
+                          <div className={cn("font-semibold text-sm mb-1", config.textClass)}>
+                            {booking.serviceName}
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            {booking.bookingTime} - {formatEndTime(booking.bookingTime, booking.duration)}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               );
             })}
