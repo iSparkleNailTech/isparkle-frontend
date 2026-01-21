@@ -135,7 +135,7 @@ const AdminCalendar = () => {
     return (
       <div className="h-dvh bg-background flex flex-col overflow-hidden">
         {/* Mobile Header - 50% of screen */}
-        <div className="bg-background border-b flex-shrink-0 h-1/2 flex flex-col">
+        <div className="bg-background flex-shrink-0 h-[50dvh] flex flex-col">
           <div className="flex items-center justify-between p-3">
             <Popover open={monthPickerOpen} onOpenChange={setMonthPickerOpen}>
               <PopoverTrigger asChild>
@@ -148,7 +148,7 @@ const AdminCalendar = () => {
                   <ChevronRight className={cn("h-4 w-4 transition-transform", monthPickerOpen && "rotate-90")} />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-64 p-3" align="start">
+              <PopoverContent className="w-64 p-3 bg-background border shadow-lg z-50" align="start">
                 <div className="flex items-center justify-between mb-3">
                   <Button variant="ghost" size="icon" onClick={() => setCurrentDate(prev => setYear(prev, getYear(prev) - 1))}>
                     <ChevronLeft className="h-4 w-4" />
@@ -228,8 +228,8 @@ const AdminCalendar = () => {
           </div>
         </div>
 
-        {/* Mobile Calendar Grid - Single Day View */}
-        <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+        {/* Mobile Calendar Grid - Single Day View - 50% of screen */}
+        <div className="h-[50dvh] flex flex-col border-t">
           {/* Day Header */}
           <div className="grid grid-cols-[50px_1fr] border-b bg-muted/30 flex-shrink-0">
             <div className="p-2 text-xs text-muted-foreground"></div>
