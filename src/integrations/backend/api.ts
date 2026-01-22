@@ -43,11 +43,22 @@ async function handleResponse<T>(response: Response): Promise<T> {
 }
 
 /**
+ * Gets base headers for requests (includes ngrok bypass header)
+ */
+function getBaseHeaders(): HeadersInit {
+  return {
+    "Content-Type": "application/json",
+    // Bypass ngrok's browser warning page
+    "ngrok-skip-browser-warning": "true",
+  };
+}
+
+/**
  * Gets authorization headers with Supabase token if available
  */
 async function getAuthHeaders(): Promise<HeadersInit> {
   const headers: HeadersInit = {
-    "Content-Type": "application/json",
+    ...getBaseHeaders(),
   };
 
   try {
@@ -68,7 +79,9 @@ export const api = {
    * Get all service categories
    */
   getServices: async (): Promise<ServicesResponse> => {
-    const response = await fetch(`${API_BASE_URL}/services`);
+    const response = await fetch(`${API_BASE_URL}/services`, {
+      headers: getBaseHeaders(),
+    });
     return handleResponse<ServicesResponse>(response);
   },
 
@@ -77,7 +90,10 @@ export const api = {
    */
   getPackages: async (serviceCategoryId: string): Promise<PackagesResponse> => {
     const response = await fetch(
-      `${API_BASE_URL}/services/${serviceCategoryId}/packages`
+      `${API_BASE_URL}/services/${serviceCategoryId}/packages`,
+      {
+        headers: getBaseHeaders(),
+      }
     );
     return handleResponse<PackagesResponse>(response);
   },
@@ -95,7 +111,9 @@ export const api = {
       packageId,
       date,
     });
-    const response = await fetch(`${API_BASE_URL}/availability?${params}`);
+    const response = await fetch(`${API_BASE_URL}/availability?${params}`, {
+      headers: getBaseHeaders(),
+    });
     return handleResponse<AvailabilityResponse>(response);
   },
 
@@ -172,7 +190,9 @@ export const api = {
 
     const queryString = params.toString();
     const url = `${API_BASE_URL}/bookings/admin${queryString ? `?${queryString}` : ''}`;
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: getBaseHeaders(),
+    });
     return handleResponse<{ bookings: Booking[] }>(response);
   },
 
