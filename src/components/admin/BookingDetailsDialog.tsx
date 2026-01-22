@@ -36,7 +36,7 @@ const BookingDetailsDialog = ({ booking, onClose }: BookingDetailsDialogProps) =
 
   return (
     <Dialog open={!!booking} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[360px] font-body p-0 gap-0">
+      <DialogContent className="max-w-[360px] md:max-w-[420px] font-body p-0 gap-0">
         <DialogHeader className="p-3 pb-2 pr-10">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-sm font-semibold font-body">Booking Details</DialogTitle>
