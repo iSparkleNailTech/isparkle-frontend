@@ -35,11 +35,15 @@ const BookingDetailsDialog = ({ booking, onClose }: BookingDetailsDialogProps) =
 
   const config = statusConfig[booking.status];
 
-  const DetailItem = ({ icon: Icon, label, value }: { icon: typeof User; label: string; value: string }) => (
-    <div className="flex items-center gap-2">
-      <Icon className="h-4 w-4 text-muted-foreground" />
-      <span className="text-sm text-muted-foreground">{label}:</span>
-      <span className="font-medium text-sm">{value}</span>
+  const DetailRow = ({ icon: Icon, label, value }: { icon: typeof User; label: string; value: string }) => (
+    <div className="flex items-start gap-3">
+      <div className="p-2 rounded-lg bg-muted">
+        <Icon className="h-4 w-4 text-muted-foreground" />
+      </div>
+      <div className="flex-1">
+        <p className="text-sm text-muted-foreground">{label}</p>
+        <p className="font-medium">{value}</p>
+      </div>
     </div>
   );
 
@@ -55,16 +59,16 @@ const BookingDetailsDialog = ({ booking, onClose }: BookingDetailsDialogProps) =
           </div>
         </DialogHeader>
 
-        <div className="space-y-4 pt-4">
+        <div className="space-y-6 pt-4">
           {/* Customer Info */}
           <div>
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 font-body">
-              Customer
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 font-body">
+              Customer Information
             </h3>
-            <div className="flex flex-wrap gap-x-6 gap-y-2">
-              <DetailItem icon={User} label="Name" value={booking.customerName} />
-              <DetailItem icon={Mail} label="Email" value={booking.customerEmail} />
-              <DetailItem icon={Phone} label="Phone" value={booking.customerPhone} />
+            <div className="space-y-3">
+              <DetailRow icon={User} label="Name" value={booking.customerName} />
+              <DetailRow icon={Mail} label="Email" value={booking.customerEmail} />
+              <DetailRow icon={Phone} label="Phone" value={booking.customerPhone} />
             </div>
           </div>
 
@@ -72,14 +76,14 @@ const BookingDetailsDialog = ({ booking, onClose }: BookingDetailsDialogProps) =
 
           {/* Service Info */}
           <div>
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 font-body">
-              Service
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 font-body">
+              Service Details
             </h3>
-            <div className="flex flex-wrap gap-x-6 gap-y-2">
-              <DetailItem icon={Tag} label="Category" value={booking.serviceCategory} />
-              <DetailItem icon={FileText} label="Service" value={booking.serviceName} />
-              <DetailItem icon={DollarSign} label="Price" value={booking.price} />
-              <DetailItem icon={Clock} label="Duration" value={booking.duration} />
+            <div className="space-y-3">
+              <DetailRow icon={Tag} label="Category" value={booking.serviceCategory} />
+              <DetailRow icon={FileText} label="Service" value={booking.serviceName} />
+              <DetailRow icon={DollarSign} label="Price" value={booking.price} />
+              <DetailRow icon={Clock} label="Duration" value={booking.duration} />
             </div>
           </div>
 
@@ -87,16 +91,16 @@ const BookingDetailsDialog = ({ booking, onClose }: BookingDetailsDialogProps) =
 
           {/* Booking Info */}
           <div>
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 font-body">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 font-body">
               Appointment
             </h3>
-            <div className="flex flex-wrap gap-x-6 gap-y-2">
-              <DetailItem 
+            <div className="space-y-3">
+              <DetailRow 
                 icon={Calendar} 
                 label="Date" 
-                value={format(new Date(booking.bookingDate), 'EEE, MMM d, yyyy')} 
+                value={format(new Date(booking.bookingDate), 'EEEE, MMMM d, yyyy')} 
               />
-              <DetailItem icon={Clock} label="Time" value={booking.bookingTime} />
+              <DetailRow icon={Clock} label="Time" value={booking.bookingTime} />
             </div>
           </div>
 
@@ -104,10 +108,10 @@ const BookingDetailsDialog = ({ booking, onClose }: BookingDetailsDialogProps) =
             <>
               <Separator />
               <div>
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 font-body">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3 font-body">
                   Notes
                 </h3>
-                <p className="text-sm text-muted-foreground bg-muted p-2 rounded-lg">
+                <p className="text-sm text-muted-foreground bg-muted p-3 rounded-lg">
                   {booking.notes}
                 </p>
               </div>
@@ -117,9 +121,9 @@ const BookingDetailsDialog = ({ booking, onClose }: BookingDetailsDialogProps) =
           {/* Actions */}
           {booking.status === 'pending' && (
             <div className="flex gap-3 pt-2">
-              <Button className="flex-1 gap-2 bg-emerald-600 hover:bg-emerald-700">
+              <Button className="flex-1 gap-2 bg-emerald-600 hover:bg-emerald-700 text-white">
                 <Check className="h-4 w-4" />
-                Complete
+                Mark Complete
               </Button>
               <Button className="flex-1 gap-2" variant="destructive">
                 <X className="h-4 w-4" />
