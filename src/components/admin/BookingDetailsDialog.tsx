@@ -37,7 +37,7 @@ const BookingDetailsDialog = ({ booking, onClose }: BookingDetailsDialogProps) =
   return (
     <Dialog open={!!booking} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[360px] font-body p-0 gap-0">
-        <DialogHeader className="p-3 pb-2">
+        <DialogHeader className="p-3 pb-2 pr-10">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-sm font-semibold font-body">Booking Details</DialogTitle>
             <Badge className={cn("font-medium text-[10px] px-1.5 py-0.5", config.className)}>
