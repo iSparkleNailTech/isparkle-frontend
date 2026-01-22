@@ -36,77 +36,75 @@ const BookingDetailsDialog = ({ booking, onClose }: BookingDetailsDialogProps) =
 
   return (
     <Dialog open={!!booking} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[420px] font-body p-0 gap-0">
-        <DialogHeader className="p-4 pb-3">
+      <DialogContent className="sm:max-w-[360px] font-body p-0 gap-0">
+        <DialogHeader className="p-3 pb-2">
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-lg font-semibold font-body">Booking Details</DialogTitle>
-            <Badge className={cn("font-medium text-xs", config.className)}>
+            <DialogTitle className="text-sm font-semibold font-body">Booking Details</DialogTitle>
+            <Badge className={cn("font-medium text-[10px] px-1.5 py-0.5", config.className)}>
               {config.label}
             </Badge>
           </div>
         </DialogHeader>
 
-        <div className="px-4 pb-4 space-y-4">
+        <div className="px-3 pb-3 space-y-3">
           {/* Service Breakdown */}
           <div>
-            <h3 className="text-sm text-muted-foreground mb-2 font-body">
+            <h3 className="text-xs text-muted-foreground mb-1.5 font-body">
               Service Breakdown
             </h3>
-            <div className="border border-border rounded-lg overflow-hidden">
-              <div className="flex justify-between items-center px-4 py-3 border-b border-border">
-                <span className="text-sm font-body">{booking.serviceName}</span>
-                <span className="text-sm font-body">{booking.price}</span>
+            <div className="border border-border rounded-md overflow-hidden">
+              <div className="flex justify-between items-center px-3 py-2 border-b border-border">
+                <span className="text-xs font-body">{booking.serviceName}</span>
+                <span className="text-xs font-body">{booking.price}</span>
               </div>
-              <div className="flex justify-between items-center px-4 py-3 border-b border-border">
-                <span className="text-sm text-muted-foreground font-body">Category</span>
-                <span className="text-sm font-body">{booking.serviceCategory}</span>
+              <div className="flex justify-between items-center px-3 py-2 border-b border-border">
+                <span className="text-xs text-muted-foreground font-body">Category</span>
+                <span className="text-xs font-body">{booking.serviceCategory}</span>
               </div>
-              <div className="flex justify-between items-center px-4 py-3 border-b border-border">
-                <span className="text-sm text-muted-foreground font-body">Duration</span>
-                <span className="text-sm font-body">{booking.duration}</span>
+              <div className="flex justify-between items-center px-3 py-2 border-b border-border">
+                <span className="text-xs text-muted-foreground font-body">Duration</span>
+                <span className="text-xs font-body">{booking.duration}</span>
               </div>
-              <div className="flex justify-between items-center px-4 py-3 bg-muted/30">
-                <span className="text-sm font-medium font-body">Total</span>
-                <span className="text-sm font-semibold text-foreground font-body">{booking.price}</span>
+              <div className="flex justify-between items-center px-3 py-2 bg-muted/30">
+                <span className="text-xs font-medium font-body">Total</span>
+                <span className="text-xs font-semibold text-foreground font-body">{booking.price}</span>
               </div>
             </div>
           </div>
 
           {/* Contact Details */}
           <div>
-            <h3 className="text-sm text-muted-foreground mb-2 font-body">
+            <h3 className="text-xs text-muted-foreground mb-1.5 font-body">
               Contact Details
             </h3>
-            <div className="border border-border rounded-lg p-4 space-y-4">
-              <div className="flex gap-4">
-                <div className="flex items-start gap-3 flex-1">
-                  <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground font-body">Customer Name</p>
-                    <p className="text-sm font-body">{booking.customerName}</p>
-                  </div>
+            <div className="border border-border rounded-md p-3 space-y-2.5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
+                  <User className="h-3 w-3 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground font-body">Customer</p>
+                  <p className="text-xs font-body">{booking.customerName}</p>
                 </div>
               </div>
               
-              <div className="flex gap-4">
-                <div className="flex items-start gap-3 flex-1">
-                  <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
+              <div className="flex gap-3">
+                <div className="flex items-center gap-2.5 flex-1">
+                  <div className="w-7 h-7 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
+                    <Phone className="h-3 w-3 text-muted-foreground" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground font-body">Phone Number</p>
-                    <p className="text-sm font-body">{booking.customerPhone}</p>
+                    <p className="text-[10px] text-muted-foreground font-body">Phone</p>
+                    <p className="text-xs font-body">{booking.customerPhone}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 flex-1">
-                  <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center gap-2.5 flex-1">
+                  <div className="w-7 h-7 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
+                    <Mail className="h-3 w-3 text-muted-foreground" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground font-body">Email Address</p>
-                    <p className="text-sm font-body truncate max-w-[120px]">{booking.customerEmail}</p>
+                    <p className="text-[10px] text-muted-foreground font-body">Email</p>
+                    <p className="text-xs font-body truncate max-w-[100px]">{booking.customerEmail}</p>
                   </div>
                 </div>
               </div>
@@ -115,27 +113,27 @@ const BookingDetailsDialog = ({ booking, onClose }: BookingDetailsDialogProps) =
 
           {/* Appointment Details */}
           <div>
-            <h3 className="text-sm text-muted-foreground mb-2 font-body">
+            <h3 className="text-xs text-muted-foreground mb-1.5 font-body">
               Appointment
             </h3>
-            <div className="border border-border rounded-lg p-4">
-              <div className="flex gap-4">
-                <div className="flex items-start gap-3 flex-1">
-                  <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
+            <div className="border border-border rounded-md p-3">
+              <div className="flex gap-3">
+                <div className="flex items-center gap-2.5 flex-1">
+                  <div className="w-7 h-7 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
+                    <Calendar className="h-3 w-3 text-muted-foreground" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground font-body">Date</p>
-                    <p className="text-sm font-body">{format(new Date(booking.bookingDate), 'EEE, MMM d, yyyy')}</p>
+                    <p className="text-[10px] text-muted-foreground font-body">Date</p>
+                    <p className="text-xs font-body">{format(new Date(booking.bookingDate), 'EEE, MMM d, yyyy')}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 flex-1">
-                  <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center gap-2.5 flex-1">
+                  <div className="w-7 h-7 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
+                    <Clock className="h-3 w-3 text-muted-foreground" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground font-body">Time</p>
-                    <p className="text-sm font-body">{booking.bookingTime}</p>
+                    <p className="text-[10px] text-muted-foreground font-body">Time</p>
+                    <p className="text-xs font-body">{booking.bookingTime}</p>
                   </div>
                 </div>
               </div>
@@ -144,11 +142,11 @@ const BookingDetailsDialog = ({ booking, onClose }: BookingDetailsDialogProps) =
 
           {booking.notes && (
             <div>
-              <h3 className="text-sm text-muted-foreground mb-2 font-body">
+              <h3 className="text-xs text-muted-foreground mb-1.5 font-body">
                 Notes
               </h3>
-              <div className="border border-border rounded-lg p-4">
-                <p className="text-sm text-muted-foreground font-body">
+              <div className="border border-border rounded-md p-3">
+                <p className="text-xs text-muted-foreground font-body">
                   {booking.notes}
                 </p>
               </div>
@@ -157,13 +155,13 @@ const BookingDetailsDialog = ({ booking, onClose }: BookingDetailsDialogProps) =
 
           {/* Actions */}
           {booking.status === 'pending' && (
-            <div className="flex gap-2 pt-1">
-              <Button size="sm" className="flex-1 gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white">
-                <Check className="h-3.5 w-3.5" />
+            <div className="flex gap-2">
+              <Button size="sm" className="flex-1 gap-1 text-xs h-8 bg-emerald-600 hover:bg-emerald-700 text-white">
+                <Check className="h-3 w-3" />
                 Complete
               </Button>
-              <Button size="sm" className="flex-1 gap-1.5" variant="destructive">
-                <X className="h-3.5 w-3.5" />
+              <Button size="sm" className="flex-1 gap-1 text-xs h-8" variant="destructive">
+                <X className="h-3 w-3" />
                 Cancel
               </Button>
             </div>
