@@ -270,28 +270,7 @@ const AdminCalendar = () => {
     <div className="min-h-screen bg-muted/30">
       <div className="max-w-[1400px] mx-auto p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2 bg-background rounded-full p-1 border">
-            <Button
-              variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-              size="sm"
-              className="rounded-full gap-2"
-              onClick={() => setViewMode('list')}
-            >
-              <List className="h-4 w-4" />
-              List
-            </Button>
-            <Button
-              variant={viewMode === 'calendar' ? 'secondary' : 'ghost'}
-              size="sm"
-              className="rounded-full gap-2"
-              onClick={() => setViewMode('calendar')}
-            >
-              <CalendarIcon className="h-4 w-4" />
-              Calendar
-            </Button>
-          </div>
-
+        <div className="flex items-center justify-center mb-6">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <Button variant="outline" size="icon" className="rounded-lg" onClick={() => navigateWeek('prev')}>
@@ -309,16 +288,6 @@ const AdminCalendar = () => {
             <div className="text-lg font-medium">
               <span className="text-3xl font-bold">{todayBookingsCount}</span>
               <span className="text-muted-foreground ml-2">appointments today</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Filter className="h-4 w-4" />
-                Filter
-              </Button>
-              <Button variant="outline" size="icon">
-                <Settings className="h-4 w-4" />
-              </Button>
             </div>
           </div>
         </div>
