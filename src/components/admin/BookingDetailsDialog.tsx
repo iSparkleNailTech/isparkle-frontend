@@ -35,15 +35,11 @@ const BookingDetailsDialog = ({ booking, onClose }: BookingDetailsDialogProps) =
 
   const config = statusConfig[booking.status];
 
-  const DetailItem = ({ icon: Icon, label, value, fullWidth = false }: { icon: typeof User; label: string; value: string; fullWidth?: boolean }) => (
-    <div className={cn("flex items-start gap-3", fullWidth && "col-span-2")}>
-      <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
-        <Icon className="h-4 w-4 text-muted-foreground" />
-      </div>
-      <div className="min-w-0">
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="text-sm font-medium truncate">{value}</p>
-      </div>
+  const DetailItem = ({ icon: Icon, label, value }: { icon: typeof User; label: string; value: string }) => (
+    <div className="flex items-center gap-2">
+      <Icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+      <span className="text-sm text-muted-foreground">{label}:</span>
+      <span className="text-sm font-medium">{value}</span>
     </div>
   );
 
@@ -62,13 +58,15 @@ const BookingDetailsDialog = ({ booking, onClose }: BookingDetailsDialogProps) =
         <div className="space-y-4 pt-2">
           {/* Customer Info */}
           <div>
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 font-body">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 font-body">
               Customer
             </h3>
-            <div className="grid grid-cols-2 gap-4">
-              <DetailItem icon={User} label="Name" value={booking.customerName} fullWidth />
-              <DetailItem icon={Phone} label="Phone" value={booking.customerPhone} />
-              <DetailItem icon={Mail} label="Email" value={booking.customerEmail} />
+            <div className="space-y-1.5">
+              <DetailItem icon={User} label="Name" value={booking.customerName} />
+              <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                <DetailItem icon={Mail} label="Email" value={booking.customerEmail} />
+                <DetailItem icon={Phone} label="Phone" value={booking.customerPhone} />
+              </div>
             </div>
           </div>
 
@@ -76,14 +74,16 @@ const BookingDetailsDialog = ({ booking, onClose }: BookingDetailsDialogProps) =
 
           {/* Service Info */}
           <div>
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 font-body">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 font-body">
               Service
             </h3>
-            <div className="grid grid-cols-2 gap-4">
-              <DetailItem icon={FileText} label="Service" value={booking.serviceName} fullWidth />
-              <DetailItem icon={Tag} label="Category" value={booking.serviceCategory} />
-              <DetailItem icon={DollarSign} label="Price" value={booking.price} />
-              <DetailItem icon={Clock} label="Duration" value={booking.duration} fullWidth />
+            <div className="space-y-1.5">
+              <DetailItem icon={FileText} label="Service" value={booking.serviceName} />
+              <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                <DetailItem icon={Tag} label="Category" value={booking.serviceCategory} />
+                <DetailItem icon={DollarSign} label="Price" value={booking.price} />
+                <DetailItem icon={Clock} label="Duration" value={booking.duration} />
+              </div>
             </div>
           </div>
 
@@ -91,10 +91,10 @@ const BookingDetailsDialog = ({ booking, onClose }: BookingDetailsDialogProps) =
 
           {/* Booking Info */}
           <div>
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 font-body">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 font-body">
               Appointment
             </h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-wrap gap-x-4 gap-y-1.5">
               <DetailItem 
                 icon={Calendar} 
                 label="Date" 
