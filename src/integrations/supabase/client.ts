@@ -5,6 +5,20 @@ import type { Database } from './types';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
+if (!SUPABASE_URL) {
+  throw new Error(
+    'Missing env.VITE_SUPABASE_URL. Please add it to your .env file. ' +
+    'Get it from your Supabase project settings: https://app.supabase.com/project/_/settings/api'
+  );
+}
+
+if (!SUPABASE_PUBLISHABLE_KEY) {
+  throw new Error(
+    'Missing env.VITE_SUPABASE_PUBLISHABLE_KEY. Please add it to your .env file. ' +
+    'Get it from your Supabase project settings (use the "anon" or "public" key, NOT the service_role key): https://app.supabase.com/project/_/settings/api'
+  );
+}
+
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 

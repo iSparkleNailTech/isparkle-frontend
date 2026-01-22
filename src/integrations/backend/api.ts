@@ -7,6 +7,7 @@ import type {
   BookingResponse,
 } from "@/types/booking";
 import type { UserResponse, UpdateUserRequest } from "@/types/user";
+import type { Booking } from "@/data/mockBookings";
 import { supabase } from "@/integrations/supabase/client";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
@@ -148,6 +149,47 @@ export const api = {
       headers,
     });
     return handleResponse<{ bookings: BookingResponse[] }>(response);
+  },
+
+  /**
+   * Get admin bookings with populated service and package data
+   */
+  getAdminBookings: async (filters?: {
+    startDate?: string; // ISO datetime string
+    endDate?: string; // ISO datetime string
+    status?: 'pending' | 'completed' | 'cancelled';
+    serviceCategoryId?: string;
+    limit?: number;
+    skip?: number;
+  }): Promise<{ bookings: Booking[] }> => {
+    const params = new URLSearchParams();
+    if (filters?.startDate) params.append('startDate', filters.startDate);
+    if (filters?.endDate) params.append('endDate', filters.endDate);
+    if (filters?.status) params.append('status', filters.status);
+    if (filters?.serviceCategoryId) params.append('serviceCategoryId', filters.serviceCategoryId);
+    if (filters?.limit) params.append('limit', filters.limit.toString());
+    if (filters?.skip) params.append('skip', filters.skip.toString());
+
+    const queryString = params.toString();
+    const url = `${API_BASE_URL}/bookings/admin${queryString ? `?${queryString}` : ''}`;
+    const response = await fetch(url);
+    return handleResponse<{ bookings: Booking[] }>(response);
+  },
+
+  /**
+   * Update booking status (complete or cancel)
+   */
+  updateBookingStatus: async (
+    bookingId: string,
+    status: 'completed' | 'cancelled'
+  ): Promise<{ booking: Booking }> => {
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/bookings/${bookingId}/status`, {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify({ status }),
+    });
+    return handleResponse<{ booking: Booking }>(response);
   },
 };
 
