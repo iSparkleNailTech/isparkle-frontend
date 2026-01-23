@@ -9,8 +9,7 @@ import type {
 import type { UserResponse, UpdateUserRequest } from "@/types/user";
 import type { Booking } from "@/data/mockBookings";
 import { supabase } from "@/integrations/supabase/client";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
+import { API_BASE_URL } from "@/config/env";
 
 class ApiError extends Error {
   constructor(
