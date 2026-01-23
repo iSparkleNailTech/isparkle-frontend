@@ -43,6 +43,7 @@ const AuthStep = ({ onSuccess }: AuthStepProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleSignIn = async () => {
+    console.log("initiating google sign in");
     setIsLoading(true);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",

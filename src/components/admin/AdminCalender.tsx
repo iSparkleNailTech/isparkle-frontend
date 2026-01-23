@@ -264,8 +264,8 @@ const AdminCalendar = () => {
                         onClick={() => setSelectedDay(day)}
                         className={cn(
                           "flex items-center justify-center h-10 w-10 mx-auto rounded-full transition-all text-sm",
-                          isSelected(day) && "bg-foreground text-background",
-                          isToday(day) && !isSelected(day) && "border-2 border-foreground",
+                          isSelected(day) && "bg-primary text-primary-foreground",
+                          isToday(day) && !isSelected(day) && "border-2 border-primary",
                           !inMonth && "text-muted-foreground/50"
                         )}
                       >
