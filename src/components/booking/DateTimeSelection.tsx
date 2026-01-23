@@ -87,7 +87,7 @@ const DateTimeSelection = ({
         <div>
           {selectedDate ? (
             <>
-              <h4 className="font-medium text-foreground mb-4">
+              <h4 className="font-body text-foreground mb-4 ">
                 {format(selectedDate, "EEEE d MMMM")}
               </h4>
               {isLoadingAvailability ? (
