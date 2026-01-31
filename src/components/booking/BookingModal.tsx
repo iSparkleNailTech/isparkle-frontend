@@ -329,7 +329,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
               />
             )}
             {step === "auth" && (
-              <AuthStep key="auth" onSuccess={handleAuthSuccess} />
+              <AuthStep key="auth" onSuccess={handleAuthSuccess} pendingBooking={booking} />
             )}
           </AnimatePresence>
         </div>
