@@ -97,7 +97,9 @@ const Services = () => {
           {serviceCategories.map((category: ServiceCategoryResponse, index: number) => {
             const Icon = getServiceIcon(category.name);
             const description = getServiceDescription(category.name);
-            
+            const nameLower = category.name.toLowerCase();
+            const showPrices = nameLower.includes("massage") || nameLower.includes("facial");
+
             return (
               <motion.div
                 key={category._id}
@@ -123,7 +125,9 @@ const Services = () => {
                         {category.packages.slice(0, 6).map((pkg) => (
                           <div key={pkg._id} className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground">{pkg.name}</span>
-                            <span className="text-primary font-semibold">GH₵{pkg.price.toFixed(0)}</span>
+                            {showPrices && (
+                              <span className="text-primary font-semibold">GH₵{pkg.price.toFixed(0)}</span>
+                            )}
                           </div>
                         ))}
                         {category.packages.length > 6 && (
