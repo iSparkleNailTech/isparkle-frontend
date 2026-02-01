@@ -6,9 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import type { BookingState } from "./BookingModal";
+
+export const PENDING_BOOKING_KEY = "isparkle_pending_booking";
 
 interface AuthStepProps {
   onSuccess: (name: string, email: string, phone: string) => void;
+  pendingBooking: BookingState;
 }
 
 type AuthMode = "options" | "login" | "signup" | "phone";
@@ -34,7 +38,7 @@ const GoogleIcon = () => (
   </svg>
 );
 
-const AuthStep = ({ onSuccess }: AuthStepProps) => {
+const AuthStep = ({ onSuccess, pendingBooking }: AuthStepProps) => {
   const [mode, setMode] = useState<AuthMode>("options");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,6 +49,15 @@ const AuthStep = ({ onSuccess }: AuthStepProps) => {
   const handleGoogleSignIn = async () => {
     console.log("initiating google sign in");
     setIsLoading(true);
+
+    // Save pending booking to localStorage before OAuth redirect
+    // Convert date to ISO string for JSON serialization
+    const bookingToSave = {
+      ...pendingBooking,
+      date: pendingBooking.date?.toISOString() || null,
+    };
+    localStorage.setItem(PENDING_BOOKING_KEY, JSON.stringify(bookingToSave));
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -54,6 +67,8 @@ const AuthStep = ({ onSuccess }: AuthStepProps) => {
 
     if (error) {
       toast.error(error.message);
+      // Clear pending booking on error
+      localStorage.removeItem(PENDING_BOOKING_KEY);
       setIsLoading(false);
     }
   };
@@ -76,7 +91,7 @@ const AuthStep = ({ onSuccess }: AuthStepProps) => {
     // Get user's name from profile or use email
     const userName = data.user?.user_metadata?.full_name || email.split("@")[0];
     const userEmail = data.user?.email || email;
-    
+
     // For login, we still need phone number - show a form to collect it
     if (!phone) {
       setMode("phone");
@@ -97,7 +112,7 @@ const AuthStep = ({ onSuccess }: AuthStepProps) => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!name || !email || !password || !phone) {
       toast.error("Please fill in all fields");
       return;
@@ -137,7 +152,7 @@ const AuthStep = ({ onSuccess }: AuthStepProps) => {
       await supabase.auth.updateUser({
         data: { phone },
       });
-      
+
       const userName = session.user.user_metadata?.full_name || session.user.email?.split("@")[0] || "";
       const userEmail = session.user.email || "";
       onSuccess(userName, userEmail, phone);
