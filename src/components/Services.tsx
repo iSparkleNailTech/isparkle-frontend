@@ -98,7 +98,7 @@ const Services = () => {
             const Icon = getServiceIcon(category.name);
             const description = getServiceDescription(category.name);
             const nameLower = category.name.toLowerCase();
-            const showPrices = nameLower.includes("massage") || nameLower.includes("facial");
+            const showPrices = nameLower.includes("massage") || nameLower.includes("facial") || nameLower.includes("waxing");
 
             return (
               <motion.div
