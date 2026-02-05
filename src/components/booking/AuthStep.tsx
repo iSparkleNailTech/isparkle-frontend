@@ -187,23 +187,23 @@ const AuthStep = ({ onSuccess, pendingBooking }: AuthStepProps) => {
             </button>
             <p className="text-sm text-muted-foreground mt-3">Sign in with Google</p>
 
-            <div className="relative my-8">
+            {/* <div className="relative my-8">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-border/50" />
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="bg-card px-4 text-muted-foreground">or</span>
               </div>
-            </div>
+            </div> */}
 
-            <Button
+            {/* <Button
               variant="gold"
               size="lg"
               className="w-full font-body"
               onClick={() => setMode("signup")}
             >
               Continue with email
-            </Button>
+            </Button> */}
           </div>
         </div>
       </motion.div>
