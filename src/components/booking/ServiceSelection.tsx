@@ -7,6 +7,7 @@ import type { ServiceCategoryResponse, PackageResponse } from "@/types/booking";
 interface ServiceSelectionProps {
   categories?: ServiceCategoryResponse[];
   selectedCategoryId?: string;
+  selectedCategoryName?: string | null;
   onSelectCategory?: (category: ServiceCategoryResponse) => void;
   onSelectPackage?: (pkg: PackageResponse, serviceCategoryId: string) => void;
 }
@@ -14,6 +15,7 @@ interface ServiceSelectionProps {
 const ServiceSelection = ({
   categories,
   selectedCategoryId,
+  selectedCategoryName,
   onSelectCategory,
   onSelectPackage,
 }: ServiceSelectionProps) => {
@@ -84,6 +86,10 @@ const ServiceSelection = ({
 
     const packages = data?.packages || [];
 
+    // Only show prices for massage, facial, and waxing categories
+    const categoryNameLower = selectedCategoryName?.toLowerCase() || "";
+    const showPrices = categoryNameLower.includes("massage") || categoryNameLower.includes("facial") || categoryNameLower.includes("waxing");
+
     if (packages.length === 0) {
       return (
         <motion.div
@@ -133,7 +139,7 @@ const ServiceSelection = ({
                     {pkg.name}
                   </h4>
                   <p className="text-sm text-muted-foreground">
-                    {duration} · <span className="font-semibold text-foreground">{price}</span>
+                    {duration}{showPrices && <> · <span className="font-semibold text-foreground">{price}</span></>}
                   </p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />

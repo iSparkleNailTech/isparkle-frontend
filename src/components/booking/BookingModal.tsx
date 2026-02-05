@@ -316,6 +316,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
               <ServiceSelection
                 key="subservice"
                 selectedCategoryId={booking.serviceCategoryId}
+                selectedCategoryName={booking.serviceCategoryName}
                 onSelectPackage={handleSelectPackage}
               />
             )}
