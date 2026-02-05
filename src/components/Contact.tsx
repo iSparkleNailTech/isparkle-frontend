@@ -98,7 +98,6 @@ const Contact = () => {
                 </h3>
                 <div className="text-cream space-y-1">
                   <p>Monday - Saturday: 9:00 AM - 7:00 PM</p>
-                  <p>Sunday: By Appointment</p>
                 </div>
               </div>
             </div>
@@ -146,7 +145,7 @@ const Contact = () => {
             className="rounded-2xl overflow-hidden border border-border/50 h-[400px] lg:h-full min-h-[300px]"
           >
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d127065.98614709972!2d-0.0693949!3d5.6698925!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf9084b2b7a773%3A0xbed14ed8650e2dd3!2sTema%2C%20Ghana!5e0!3m2!1sen!2s!4v1699000000000!5m2!1sen!2s"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3970.296549847819!2d-0.0129047!3d5.6701939!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf8152a66ca471%3A0xa5a5872a3afd027a!2siSparkle!5e0!3m2!1sen!2sgh!4v1770288675043!5m2!1sen!2sgh"
               width="100%"
               height="100%"
               style={{ border: 0, filter: "invert(90%) hue-rotate(180deg)" }}
