@@ -49,6 +49,8 @@ export interface BookingResponse {
   startTime: string;
   endTime: string;
   status: string;
+  paymentReference?: string;
+  paymentStatus: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -58,6 +60,11 @@ export interface CreateBookingResponse {
   assignedWorker: {
     _id: string;
     name: string;
+  };
+  payment: {
+    accessCode: string;
+    reference: string;
+    authorizationUrl: string;
   };
 }
 

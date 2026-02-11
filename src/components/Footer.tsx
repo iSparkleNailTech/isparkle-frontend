@@ -39,14 +39,14 @@ const Footer = () => {
             >
               <Instagram className="w-5 h-5" />
             </a>
-            <a
+            {/* <a
               href="https://facebook.com/ISparkle"
               target="_blank"
               rel="noopener noreferrer"
               className="text-cream hover:text-primary transition-colors"
             >
               <Facebook className="w-5 h-5" />
-            </a>
+            </a> */}
             <a
               href="https://tiktok.com/@isparkle_1"
               target="_blank"

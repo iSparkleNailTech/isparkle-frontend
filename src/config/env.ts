@@ -12,6 +12,9 @@ export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 export const SUPABASE_PUBLISHABLE_KEY =
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
+// Paystack Configuration
+export const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
+
 // Validation
 if (!SUPABASE_URL) {
   throw new Error(
@@ -27,6 +30,13 @@ if (!SUPABASE_PUBLISHABLE_KEY) {
   );
 }
 
+if (!PAYSTACK_PUBLIC_KEY) {
+  throw new Error(
+    "Missing env.VITE_PAYSTACK_PUBLIC_KEY. Please add it to your .env file. " +
+      "Get it from your Paystack dashboard: https://dashboard.paystack.com/#/settings/developers"
+  );
+}
+
 // Export a config object for convenience
 export const env = {
   api: {
@@ -35,5 +45,8 @@ export const env = {
   supabase: {
     url: SUPABASE_URL,
     publishableKey: SUPABASE_PUBLISHABLE_KEY,
+  },
+  paystack: {
+    publicKey: PAYSTACK_PUBLIC_KEY,
   },
 } as const;

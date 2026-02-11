@@ -11,6 +11,7 @@ import ReviewsSection from "@/components/ReviewsSection";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import BookingModal from "@/components/booking/BookingModal";
+import type { PendingPaymentInfo } from "@/components/booking/BookingModal";
 import { PENDING_BOOKING_KEY } from "@/components/booking/AuthStep";
 import { supabase } from "@/integrations/supabase/client";
 import { api } from "@/integrations/backend/api";
@@ -20,9 +21,13 @@ const Index = () => {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [isProcessingPendingBooking, setIsProcessingPendingBooking] = useState(false);
+  const [pendingPayment, setPendingPayment] = useState<PendingPaymentInfo | null>(null);
 
   const handleOpenBooking = () => setIsBookingOpen(true);
-  const handleCloseBooking = () => setIsBookingOpen(false);
+  const handleCloseBooking = () => {
+    setIsBookingOpen(false);
+    setPendingPayment(null);
+  };
 
   // Process pending booking from OAuth redirect
   useEffect(() => {
@@ -63,17 +68,26 @@ const Index = () => {
         // Generate idempotency key
         const idempotencyKey = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
-        // Submit the booking
-        await api.createBooking({
+        // Submit the booking and get payment info
+        const result = await api.createBooking({
           serviceCategoryId: pendingBooking.serviceCategoryId,
           packageId: pendingBooking.packageId,
           startTime: startTime.toISOString(),
           idempotencyKey,
         });
 
-        toast.success("Booking Confirmed!", {
-          description: `Your ${pendingBooking.packageName || "appointment"} is scheduled for ${bookingDate.toLocaleDateString()} at ${pendingBooking.timeSlot}.`,
+        // Open the booking modal at the payment step
+        setPendingPayment({
+          bookingId: result.booking._id,
+          email: session.user.email || "",
+          amount: pendingBooking.packagePrice || 0,
+          reference: result.payment.reference,
+          accessCode: result.payment.accessCode,
+          packageName: pendingBooking.packageName || "appointment",
+          date: bookingDate,
+          timeSlot: pendingBooking.timeSlot,
         });
+        setIsBookingOpen(true);
       } catch (error) {
         console.error("Failed to process pending booking:", error);
         toast.error("Booking Failed", {
@@ -120,7 +134,11 @@ const Index = () => {
 
       <AnimatePresence>
         {isBookingOpen && (
-          <BookingModal isOpen={isBookingOpen} onClose={handleCloseBooking} />
+          <BookingModal
+            isOpen={isBookingOpen}
+            onClose={handleCloseBooking}
+            initialPayment={pendingPayment}
+          />
         )}
       </AnimatePresence>
 

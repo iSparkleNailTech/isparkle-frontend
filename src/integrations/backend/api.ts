@@ -133,6 +133,25 @@ export const api = {
   },
 
   /**
+   * Verify a Paystack payment for a booking
+   */
+  verifyPayment: async (
+    bookingId: string,
+    reference: string
+  ): Promise<{ booking: BookingResponse }> => {
+    const headers = await getAuthHeaders();
+    const response = await fetch(
+      `${API_BASE_URL}/bookings/${bookingId}/verify-payment`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ reference }),
+      }
+    );
+    return handleResponse<{ booking: BookingResponse }>(response);
+  },
+
+  /**
    * Get current user profile
    */
   getCurrentUser: async (): Promise<{ user: UserResponse }> => {

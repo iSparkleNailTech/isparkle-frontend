@@ -5,24 +5,38 @@ import { useQuery } from "@tanstack/react-query";
 import ServiceSelection from "./ServiceSelection";
 import DateTimeSelection from "./DateTimeSelection";
 import AuthStep from "./AuthStep";
+import PaymentStep from "./PaymentStep";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { api } from "@/integrations/backend/api";
-import type { ServiceCategoryResponse, PackageResponse } from "@/types/booking";
+import type { ServiceCategoryResponse, PackageResponse, CreateBookingResponse } from "@/types/booking";
+
+export interface PendingPaymentInfo {
+  bookingId: string;
+  email: string;
+  amount: number;
+  reference: string;
+  accessCode: string;
+  packageName: string;
+  date: Date | null;
+  timeSlot: string | null;
+}
 
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialPayment?: PendingPaymentInfo | null;
 }
 
-export type BookingStep = "service" | "subservice" | "datetime" | "auth";
+export type BookingStep = "service" | "subservice" | "datetime" | "auth" | "payment";
 
 export interface BookingState {
   serviceCategoryId: string | null;
   serviceCategoryName: string | null;
   packageId: string | null;
   packageName: string | null;
+  packagePrice: number | null;
   date: Date | null;
   timeSlot: string | null;
   customerName: string | null;
@@ -30,13 +44,14 @@ export interface BookingState {
   customerPhone: string | null;
 }
 
-const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
+const BookingModal = ({ isOpen, onClose, initialPayment }: BookingModalProps) => {
   const [step, setStep] = useState<BookingStep>("service");
   const [booking, setBooking] = useState<BookingState>({
     serviceCategoryId: null,
     serviceCategoryName: null,
     packageId: null,
     packageName: null,
+    packagePrice: null,
     date: null,
     timeSlot: null,
     customerName: null,
@@ -45,6 +60,33 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
   });
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<{ name: string; email: string; phone?: string } | null>(null);
+  const [paymentInfo, setPaymentInfo] = useState<{
+    bookingId: string;
+    email: string;
+    amount: number;
+    reference: string;
+    accessCode: string;
+  } | null>(null);
+
+  // If opened with initial payment info (e.g. after OAuth redirect), jump to payment step
+  useEffect(() => {
+    if (initialPayment && isOpen) {
+      setPaymentInfo({
+        bookingId: initialPayment.bookingId,
+        email: initialPayment.email,
+        amount: initialPayment.amount,
+        reference: initialPayment.reference,
+        accessCode: initialPayment.accessCode,
+      });
+      setBooking((prev) => ({
+        ...prev,
+        packageName: initialPayment.packageName,
+        date: initialPayment.date,
+        timeSlot: initialPayment.timeSlot,
+      }));
+      setStep("payment");
+    }
+  }, [initialPayment, isOpen]);
 
   const { data: servicesData } = useQuery({
     queryKey: ["services"],
@@ -100,6 +142,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
       ...prev,
       packageId: pkg._id,
       packageName: pkg.name,
+      packagePrice: pkg.price,
     }));
     setStep("datetime");
   };
@@ -188,12 +231,21 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
         bookingRequest.customerPhone = b.customerPhone;
       }
 
-      await api.createBooking(bookingRequest);
+      const result: CreateBookingResponse = await api.createBooking(bookingRequest);
 
-      toast.success("Booking Confirmed!", {
-        description: `Your ${b.packageName} appointment is scheduled for ${b.date?.toLocaleDateString()} at ${b.timeSlot}.`,
+      // Determine the email for Paystack
+      const paymentEmail =
+        b.customerEmail || userProfile?.email || user?.email || "";
+
+      // Store payment info and transition to payment step
+      setPaymentInfo({
+        bookingId: result.booking._id,
+        email: paymentEmail,
+        amount: b.packagePrice || 0,
+        reference: result.payment.reference,
+        accessCode: result.payment.accessCode,
       });
-      handleClose();
+      setStep("payment");
     } catch (error: any) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to create booking";
@@ -219,6 +271,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
           ...prev,
           packageId: null,
           packageName: null,
+          packagePrice: null,
         }));
         break;
       case "auth":
@@ -228,6 +281,9 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
           date: null,
           timeSlot: null,
         }));
+        break;
+      case "payment":
+        // Don't allow going back from payment - booking is already created
         break;
     }
   };
@@ -239,12 +295,14 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
       serviceCategoryName: null,
       packageId: null,
       packageName: null,
+      packagePrice: null,
       date: null,
       timeSlot: null,
       customerName: null,
       customerEmail: null,
       customerPhone: null,
     });
+    setPaymentInfo(null);
     onClose();
   };
 
@@ -258,6 +316,8 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
         return "Select a time";
       case "auth":
         return "Your details";
+      case "payment":
+        return "Payment";
     }
   };
 
@@ -282,7 +342,7 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border/50">
           <div className="flex items-center gap-3">
-            {step !== "service" && (
+            {step !== "service" && step !== "payment" && (
               <button
                 onClick={handleBack}
                 className="p-1 rounded-full hover:bg-secondary transition-colors"
@@ -331,6 +391,24 @@ const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {
             )}
             {step === "auth" && (
               <AuthStep key="auth" onSuccess={handleAuthSuccess} pendingBooking={booking} />
+            )}
+            {step === "payment" && paymentInfo && (
+              <PaymentStep
+                key="payment"
+                bookingId={paymentInfo.bookingId}
+                email={paymentInfo.email}
+                amount={paymentInfo.amount}
+                reference={paymentInfo.reference}
+                accessCode={paymentInfo.accessCode}
+                packageName={booking.packageName || ""}
+                onSuccess={() => {
+                  toast.success("Booking Confirmed!", {
+                    description: `Your ${booking.packageName} appointment is scheduled for ${booking.date?.toLocaleDateString()} at ${booking.timeSlot}.`,
+                  });
+                  handleClose();
+                }}
+                onClose={handleClose}
+              />
             )}
           </AnimatePresence>
         </div>
