@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronLeft } from "lucide-react";
+import { X, ChevronLeft, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import ServiceSelection from "./ServiceSelection";
 import DateTimeSelection from "./DateTimeSelection";
@@ -67,6 +67,7 @@ const BookingModal = ({ isOpen, onClose, initialPayment }: BookingModalProps) =>
     reference: string;
     accessCode: string;
   } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // If opened with initial payment info (e.g. after OAuth redirect), jump to payment step
   useEffect(() => {
@@ -207,6 +208,7 @@ const BookingModal = ({ isOpen, onClose, initialPayment }: BookingModalProps) =>
       return;
     }
 
+    setIsSubmitting(true);
     try {
       // Combine date and time slot into ISO datetime
       const [hours, minutes] = b.timeSlot.split(":").map(Number);
@@ -252,6 +254,8 @@ const BookingModal = ({ isOpen, onClose, initialPayment }: BookingModalProps) =>
       toast.error("Booking Failed", {
         description: errorMessage,
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -412,6 +416,17 @@ const BookingModal = ({ isOpen, onClose, initialPayment }: BookingModalProps) =>
             )}
           </AnimatePresence>
         </div>
+
+        {isSubmitting && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+            <div className="flex flex-col items-center gap-3 p-6 rounded-2xl bg-card border border-border shadow-gold-lg">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+              <p className="font-body text-sm text-muted-foreground">
+                Preparing your secure payment...
+              </p>
+            </div>
+          </div>
+        )}
       </motion.div>
     </motion.div>
   );

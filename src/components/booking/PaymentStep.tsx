@@ -130,7 +130,7 @@ const PaymentStep = ({
           <div className="bg-secondary/50 rounded-xl p-4 mb-6">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Total Amount</span>
-              <span className="text-2xl font-semibold text-foreground">
+              <span className="text-base font-medium text-foreground">
                 GH&#x20B5;{amount.toFixed(2)}
               </span>
             </div>

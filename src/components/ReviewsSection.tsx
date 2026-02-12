@@ -90,15 +90,15 @@ const ReviewsSection = () => {
             >
               Instagram
             </a>
-            {" "}or{" "}
-            <a 
+            {/* {" "}or{" "} */}
+            {/* <a 
               href="https://facebook.com/ISparkle" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-primary hover:underline"
             >
               Facebook
-            </a>
+            </a> */}
           </p>
         </motion.div>
       </div>
