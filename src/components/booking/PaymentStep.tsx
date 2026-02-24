@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { CreditCard, Loader2, CheckCircle, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePaystackPayment } from "react-paystack";
-import { PAYSTACK_PUBLIC_KEY } from "@/config/env";
+import { env, PAYSTACK_FEE_RATE, PAYSTACK_PUBLIC_KEY } from "@/config/env";
 import { api } from "@/integrations/backend/api";
 import { toast } from "sonner";
 
@@ -11,9 +11,8 @@ interface PaymentStepProps {
   bookingId: string;
   email: string;
   amount: number; // Amount in the base currency unit (e.g. GHS)
-  reference: string;
-  accessCode: string;
   packageName: string;
+  serviceCategoryName: string;
   onSuccess: () => void;
   onClose: () => void;
 }
@@ -22,23 +21,34 @@ const PaymentStep = ({
   bookingId,
   email,
   amount,
-  reference,
   packageName,
+  serviceCategoryName,
   onSuccess,
   onClose,
 }: PaymentStepProps) => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [paymentComplete, setPaymentComplete] = useState(false);
 
+  const feeRate = Number(PAYSTACK_FEE_RATE);
+  const netPrice = amount
+  const grossPrice = netPrice / (1 - feeRate);
   const config = {
-    reference,
     email,
-    amount: Math.round(amount * 100), // Convert to pesewas
+    amount: Math.round(grossPrice * 100), // Convert to pesewas
     publicKey: PAYSTACK_PUBLIC_KEY,
     currency: "GHS" as const,
   };
 
   const initializePayment = usePaystackPayment(config);
+
+  const isDepositService = (() => {
+    const category = serviceCategoryName.toLowerCase();
+    return (
+      category.includes("nail") ||
+      category.includes("pedicure") ||
+      category.includes("lash")
+    );
+  })();
 
   const handlePaystackSuccess = useCallback(
     async (response: { reference: string }) => {
@@ -127,7 +137,7 @@ const PaymentStep = ({
           </div>
 
           {/* Amount display */}
-          <div className="bg-secondary/50 rounded-xl p-4 mb-6">
+          <div className="bg-secondary/50 rounded-xl p-4 mb-4">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Total Amount</span>
               <span className="text-base font-medium text-foreground">
@@ -135,6 +145,15 @@ const PaymentStep = ({
               </span>
             </div>
           </div>
+
+          {isDepositService && (
+            <p className="text-xs text-amber-500 mb-4">
+              You are being charged GHS 100 as part of your total service charge to secure your booking. This amount will be deducted from your total service charge. Deposits are not refundable.
+            </p>
+          )}
+            <p className="text-xs text-amber-500 mb-4">
+              Paystack will charge you a service fee of {PAYSTACK_FEE_RATE * 100}% on top of the total amount.
+            </p>
 
           {/* Pay button */}
           <Button

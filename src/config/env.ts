@@ -14,6 +14,14 @@ export const SUPABASE_PUBLISHABLE_KEY =
 
 // Paystack Configuration
 export const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
+export const PAYSTACK_FEE_RATE = import.meta.env.VITE_PAYSTACK_FEE_RATE;
+
+if (!PAYSTACK_FEE_RATE) {
+  throw new Error(
+    "Missing env.VITE_PAYSTACK_FEE_RATE. Please add it to your .env file. " +
+      "Get it from your Paystack dashboard: https://dashboard.paystack.com/#/settings/developers"
+  );
+}
 
 // Validation
 if (!SUPABASE_URL) {
@@ -48,5 +56,6 @@ export const env = {
   },
   paystack: {
     publicKey: PAYSTACK_PUBLIC_KEY,
+    feeRate: PAYSTACK_FEE_RATE,
   },
 } as const;

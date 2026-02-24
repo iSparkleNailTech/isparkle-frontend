@@ -16,8 +16,6 @@ export interface PendingPaymentInfo {
   bookingId: string;
   email: string;
   amount: number;
-  reference: string;
-  accessCode: string;
   packageName: string;
   date: Date | null;
   timeSlot: string | null;
@@ -64,8 +62,6 @@ const BookingModal = ({ isOpen, onClose, initialPayment }: BookingModalProps) =>
     bookingId: string;
     email: string;
     amount: number;
-    reference: string;
-    accessCode: string;
   } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -76,8 +72,6 @@ const BookingModal = ({ isOpen, onClose, initialPayment }: BookingModalProps) =>
         bookingId: initialPayment.bookingId,
         email: initialPayment.email,
         amount: initialPayment.amount,
-        reference: initialPayment.reference,
-        accessCode: initialPayment.accessCode,
       });
       setBooking((prev) => ({
         ...prev,
@@ -244,8 +238,6 @@ const BookingModal = ({ isOpen, onClose, initialPayment }: BookingModalProps) =>
         bookingId: result.booking._id,
         email: paymentEmail,
         amount: b.packagePrice || 0,
-        reference: result.payment.reference,
-        accessCode: result.payment.accessCode,
       });
       setStep("payment");
     } catch (error: any) {
@@ -402,9 +394,8 @@ const BookingModal = ({ isOpen, onClose, initialPayment }: BookingModalProps) =>
                 bookingId={paymentInfo.bookingId}
                 email={paymentInfo.email}
                 amount={paymentInfo.amount}
-                reference={paymentInfo.reference}
-                accessCode={paymentInfo.accessCode}
                 packageName={booking.packageName || ""}
+                serviceCategoryName={booking.serviceCategoryName || ""}
                 onSuccess={() => {
                   toast.success("Booking Confirmed!", {
                     description: `Your ${booking.packageName} appointment is scheduled for ${booking.date?.toLocaleDateString()} at ${booking.timeSlot}.`,

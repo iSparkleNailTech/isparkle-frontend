@@ -139,7 +139,7 @@ const ServiceSelection = ({
                     {pkg.name}
                   </h4>
                   <p className="text-sm text-muted-foreground">
-                    {duration}{showPrices && <> · <span className="font-semibold text-foreground">{price}</span></>}
+                    {duration}{showPrices && <> · <span className=" text-foreground">{price}</span></>}
                   </p>
                 </div>
                 <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
