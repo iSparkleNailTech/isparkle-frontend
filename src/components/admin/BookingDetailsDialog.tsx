@@ -15,16 +15,24 @@ interface BookingDetailsDialogProps {
   onStatusUpdate?: () => void;
 }
 
-const statusConfig: Record<BookingStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className: string }> = {
+const statusConfig: Record<
+  BookingStatus,
+  { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className: string }
+> = {
+  pending: {
+    label: 'Scheduled',
+    variant: 'secondary',
+    className: 'bg-sky-100 text-sky-700 hover:bg-sky-100',
+  },
+  confirmed: {
+    label: 'Confirmed',
+    variant: 'default',
+    className: 'bg-indigo-100 text-indigo-700 hover:bg-indigo-100',
+  },
   completed: {
     label: 'Completed',
     variant: 'default',
     className: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100',
-  },
-  pending: {
-    label: 'Pending',
-    variant: 'secondary',
-    className: 'bg-sky-100 text-sky-700 hover:bg-sky-100',
   },
   cancelled: {
     label: 'Cancelled',
@@ -193,7 +201,7 @@ const BookingDetailsDialog = ({ booking, onClose, onStatusUpdate }: BookingDetai
           )}
 
           {/* Actions */}
-          {currentBooking.status === 'pending' && (
+          {(currentBooking.status === 'pending' || currentBooking.status === 'confirmed') && (
             <div className="flex gap-2">
               <Button 
                 size="sm" 

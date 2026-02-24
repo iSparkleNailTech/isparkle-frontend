@@ -194,7 +194,7 @@ export const api = {
   getAdminBookings: async (filters?: {
     startDate?: string; // ISO datetime string
     endDate?: string; // ISO datetime string
-    status?: 'pending' | 'completed' | 'cancelled';
+    status?: 'pending' | 'confirmed' | 'completed' | 'cancelled';
     serviceCategoryId?: string;
     limit?: number;
     skip?: number;

@@ -23,20 +23,30 @@ const MONTHS = [
 
 const DAY_HEADERS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 
-const statusConfig: Record<BookingStatus, { label: string; bgClass: string; textClass: string; borderClass: string; icon: typeof Check }> = {
-  completed: {
-    label: 'Completed',
-    bgClass: 'bg-emerald-50',
-    textClass: 'text-emerald-700',
-    borderClass: 'border-l-emerald-500',
-    icon: Check,
-  },
+const statusConfig: Record<
+  BookingStatus,
+  { label: string; bgClass: string; textClass: string; borderClass: string; icon: typeof Check }
+> = {
   pending: {
     label: 'Scheduled',
     bgClass: 'bg-sky-100',
     textClass: 'text-sky-700',
     borderClass: 'border-l-sky-400',
     icon: Clock,
+  },
+  confirmed: {
+    label: 'Confirmed',
+    bgClass: 'bg-indigo-50',
+    textClass: 'text-indigo-700',
+    borderClass: 'border-l-indigo-500',
+    icon: Check,
+  },
+  completed: {
+    label: 'Completed',
+    bgClass: 'bg-emerald-50',
+    textClass: 'text-emerald-700',
+    borderClass: 'border-l-emerald-500',
+    icon: Check,
   },
   cancelled: {
     label: 'Cancelled',
@@ -198,7 +208,7 @@ const AdminCalendar = () => {
 
   if (isMobile) {
     return (
-      <div className="h-dvh bg-background flex flex-col overflow-hidden">
+      <div className="h-dvh bg-background flex flex-col overflow-hidden relative">
         {/* Mobile Header */}
         <div className="flex items-center justify-center px-4 py-3 flex-shrink-0">
           <Popover open={monthPickerOpen} onOpenChange={setMonthPickerOpen}>
@@ -302,7 +312,7 @@ const AdminCalendar = () => {
                         )}
                       >
                         <div className={cn("font-medium text-sm truncate", config.textClass)}>
-                          {booking.serviceCategory} - {booking.customerName}
+                          {booking.serviceCategory} - {(booking.customerName || booking.customerEmail || 'Customer')}
                         </div>
                         <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
                           <Clock className="h-3 w-3" />
@@ -323,13 +333,21 @@ const AdminCalendar = () => {
           onClose={() => setSelectedBooking(null)}
           onStatusUpdate={refreshBookings}
         />
+
+        {loading && (
+          <div className="absolute inset-0 z-40 flex items-center justify-center bg-background/70 backdrop-blur-sm">
+            <span className="text-xs text-muted-foreground">
+              Loading bookings...
+            </span>
+          </div>
+        )}
       </div>
     );
   }
 
   // Desktop View (existing)
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-muted/30 relative">
       <div className="max-w-[1400px] mx-auto p-6">
         {/* Header */}
         <div className="flex items-center justify-center mb-6">
@@ -408,7 +426,7 @@ const AdminCalendar = () => {
                             )}
                           >
                             <div className={cn("font-medium text-sm mb-1", config.textClass)}>
-                              {booking.serviceCategory} - {booking.customerName}
+                              {booking.serviceCategory} - {(booking.customerName || booking.customerEmail || 'Customer')}
                             </div>
                             <div className="flex items-center gap-1 text-xs text-muted-foreground">
                               <Clock className="h-3 w-3" />
@@ -431,6 +449,14 @@ const AdminCalendar = () => {
         onClose={() => setSelectedBooking(null)}
         onStatusUpdate={refreshBookings}
       />
+
+      {loading && (
+        <div className="absolute inset-0 z-40 flex items-center justify-center bg-background/70 backdrop-blur-sm">
+          <span className="text-sm text-muted-foreground">
+            Loading bookings...
+          </span>
+        </div>
+      )}
     </div>
   );
 };
