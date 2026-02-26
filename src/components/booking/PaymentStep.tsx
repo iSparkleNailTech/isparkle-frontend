@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { CreditCard, Loader2, CheckCircle, ShieldCheck } from "lucide-react";
+import { CreditCard, Loader2, CheckCircle, ShieldCheck, Link } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePaystackPayment } from "react-paystack";
 import { env, PAYSTACK_FEE_RATE, PAYSTACK_PUBLIC_KEY } from "@/config/env";
@@ -152,7 +152,7 @@ const PaymentStep = ({
             </p>
           )}
             <p className="text-xs text-amber-500 mb-4">
-              Paystack will charge you a service fee of {PAYSTACK_FEE_RATE * 100}% on top of the total amount.
+              Paystack will charge you a service fee of {PAYSTACK_FEE_RATE * 100}% on top of the total amount. Full refund policy can be found <a href="/refund-cancellation-policy" className="text-primary underline underline-offset-4 transition-colors">here</a>.
             </p>
 
           {/* Pay button */}
