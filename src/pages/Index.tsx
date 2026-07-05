@@ -29,27 +29,25 @@ const Index = () => {
     setPendingPayment(null);
   };
 
-  // Process pending booking from OAuth redirect
+  // Process pending booking from OAuth redirect.
+  // Uses onAuthStateChange instead of getSession() to handle Supabase's async
+  // PKCE code exchange — getSession() on mount races against the exchange and
+  // returns null, silently clearing the pending booking before auth completes.
   useEffect(() => {
-    const processPendingBooking = async () => {
-      const pendingBookingStr = localStorage.getItem(PENDING_BOOKING_KEY);
-      if (!pendingBookingStr) return;
+    const pendingBookingStr = localStorage.getItem(PENDING_BOOKING_KEY);
+    if (!pendingBookingStr) return;
 
-      // Check if user is authenticated
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
-        // User not authenticated yet, clear invalid pending booking
-        localStorage.removeItem(PENDING_BOOKING_KEY);
-        return;
-      }
+    let processed = false;
 
-      // Show loading state
+    const processPendingBooking = async (userEmail: string) => {
+      if (processed) return;
+      processed = true;
+
       setIsProcessingPendingBooking(true);
 
       try {
         const pendingBooking = JSON.parse(pendingBookingStr);
 
-        // Validate required fields
         if (
           !pendingBooking.serviceCategoryId ||
           !pendingBooking.packageId ||
@@ -59,16 +57,13 @@ const Index = () => {
           throw new Error("Invalid booking data");
         }
 
-        // Convert date string back to Date and build start time
         const bookingDate = new Date(pendingBooking.date);
         const [hours, minutes] = pendingBooking.timeSlot.split(":").map(Number);
         const startTime = new Date(bookingDate);
         startTime.setHours(hours, minutes, 0, 0);
 
-        // Generate idempotency key
         const idempotencyKey = `${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
-        // Submit the booking and get payment info
         const result = await api.createBooking({
           serviceCategoryId: pendingBooking.serviceCategoryId,
           packageId: pendingBooking.packageId,
@@ -76,13 +71,12 @@ const Index = () => {
           idempotencyKey,
         });
 
-        // Open the booking modal at the payment step
         setPendingPayment({
           bookingId: result.booking._id,
-          email: session.user.email || "",
+          email: userEmail,
           amount: pendingBooking.packagePrice || 0,
-          reference: result.payment.reference,
-          accessCode: result.payment.accessCode,
+          // reference: result.payment.reference,
+          // accessCode: result.payment.accessCode,
           packageName: pendingBooking.packageName || "appointment",
           date: bookingDate,
           timeSlot: pendingBooking.timeSlot,
@@ -94,13 +88,18 @@ const Index = () => {
           description: error instanceof Error ? error.message : "Failed to complete your booking. Please try again.",
         });
       } finally {
-        // Always clear the pending booking and loading state
         localStorage.removeItem(PENDING_BOOKING_KEY);
         setIsProcessingPendingBooking(false);
       }
     };
 
-    processPendingBooking();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
+        processPendingBooking(session.user.email ?? "");
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleNavigate = (section: string) => {
