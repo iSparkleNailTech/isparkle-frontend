@@ -12,7 +12,6 @@ interface PaymentStepProps {
   email: string;
   amount: number; // Amount in the base currency unit (e.g. GHS)
   packageName: string;
-  serviceCategoryName: string;
   onSuccess: () => void;
   onClose: () => void;
 }
@@ -22,7 +21,6 @@ const PaymentStep = ({
   email,
   amount,
   packageName,
-  serviceCategoryName,
   onSuccess,
   onClose,
 }: PaymentStepProps) => {
@@ -34,21 +32,12 @@ const PaymentStep = ({
   const grossPrice = netPrice / (1 - feeRate);
   const config = {
     email,
-    amount: Math.round(grossPrice * 100), // Convert to pesewas
+    amount: Math.ceil(grossPrice * 100),
     publicKey: PAYSTACK_PUBLIC_KEY,
     currency: "GHS" as const,
   };
 
   const initializePayment = usePaystackPayment(config);
-
-  const isDepositService = (() => {
-    const category = serviceCategoryName.toLowerCase();
-    return (
-      category.includes("nail") ||
-      category.includes("pedicure") ||
-      category.includes("lash")
-    );
-  })();
 
   const handlePaystackSuccess = useCallback(
     async (response: { reference: string }) => {
@@ -146,11 +135,9 @@ const PaymentStep = ({
             </div>
           </div>
 
-          {isDepositService && (
-            <p className="text-xs text-amber-500 mb-4">
+          <p className="text-xs text-amber-500 mb-4">
               You are being charged GHS 100 as part of your total service charge to secure your booking. This amount will be deducted from your total service charge. Deposits are not refundable.
             </p>
-          )}
             <p className="text-xs text-amber-500 mb-4">
               Paystack will charge you a service fee of {PAYSTACK_FEE_RATE * 100}% on top of the total amount. Full refund policy can be found <a href="/refund-cancellation-policy" className="text-primary underline underline-offset-4 transition-colors">here</a>.
             </p>

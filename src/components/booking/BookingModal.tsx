@@ -237,7 +237,7 @@ const BookingModal = ({ isOpen, onClose, initialPayment }: BookingModalProps) =>
       setPaymentInfo({
         bookingId: result.booking._id,
         email: paymentEmail,
-        amount: b.packagePrice || 0,
+        amount: 100,
       });
       setStep("payment");
     } catch (error: any) {
@@ -395,7 +395,6 @@ const BookingModal = ({ isOpen, onClose, initialPayment }: BookingModalProps) =>
                 email={paymentInfo.email}
                 amount={paymentInfo.amount}
                 packageName={booking.packageName || ""}
-                serviceCategoryName={booking.serviceCategoryName || ""}
                 onSuccess={() => {
                   toast.success("Booking Confirmed!", {
                     description: `Your ${booking.packageName} appointment is scheduled for ${booking.date?.toLocaleDateString()} at ${booking.timeSlot}.`,
