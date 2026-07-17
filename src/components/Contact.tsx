@@ -109,23 +109,23 @@ const Contact = () => {
               </h3>
               <div className="flex gap-4">
                 <a
-                  href="https://instagram.com/isparklesolutions"
+                  href="https://www.instagram.com/isparklesolutions?utm_source=qr"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-12 h-12 rounded-full border border-primary/50 flex items-center justify-center hover:bg-primary hover:border-primary transition-all group"
                 >
                   <Instagram className="w-5 h-5 text-primary group-hover:text-primary-foreground transition-colors" />
                 </a>
-                {/* <a
-                  href="https://facebook.com/ISparkle"
+                <a
+                  href="https://www.facebook.com/share/17qMhwWHiM/?mibextid=wwXIfr"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-12 h-12 rounded-full border border-primary/50 flex items-center justify-center hover:bg-primary hover:border-primary transition-all group"
                 >
                   <Facebook className="w-5 h-5 text-primary group-hover:text-primary-foreground transition-colors" />
-                </a> */}
+                </a>
                 <a
-                  href="https://tiktok.com/@isparkle_1"
+                  href="https://vt.tiktok.com/ZSX6sfgDG"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-12 h-12 rounded-full border border-primary/50 flex items-center justify-center hover:bg-primary hover:border-primary transition-all group"

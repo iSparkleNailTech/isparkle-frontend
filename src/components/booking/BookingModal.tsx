@@ -364,7 +364,7 @@ const BookingModal = ({ isOpen, onClose, initialPayment }: BookingModalProps) =>
             {step === "service" && (
               <ServiceSelection
                 key="service"
-                categories={servicesData?.services}
+                categories={servicesData?.services?.filter(c => !c.name.toLowerCase().includes('lash'))}
                 onSelectCategory={handleSelectCategory}
               />
             )}

@@ -70,7 +70,9 @@ const Services = () => {
     );
   }
 
-  const serviceCategories = data?.services || [];
+  const serviceCategories = (data?.services || []).filter(
+    (c: ServiceCategoryResponse) => !c.name.toLowerCase().includes('lash')
+  );
 
   return (
     <section id="services" className="py-24 bg-black-light relative">
